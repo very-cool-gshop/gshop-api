@@ -12,11 +12,6 @@ const ProductVariant = sequelize.define('ProductVariant', {
     allowNull: false,
     references: { model: 'products', key: 'id' },
   },
-  sku: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
