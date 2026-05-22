@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
-import sequelize from './db.js';
+import sequelize from './config/db.js';
 import User from './models/user.js';
 
 const app = express();
