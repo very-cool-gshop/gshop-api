@@ -1,16 +1,6 @@
 import { User } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 
-export const createUser = async (req, res, next) => {
-  try {
-    const { name, email, password } = req.body;
-    const user = await User.create({ name, email, password });
-    res.status(201).json(user);
-  } catch (err) {
-    next(err);
-  }
-};
-
 export const getUser = async (req, res, next) => {
   try {
     const user = await User.findByPk(req.params.id, {

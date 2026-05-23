@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { createUser, getUser, updateUser, deleteUser } from '../controllers/userController.js';
+import authenticate from '../middlewares/authenticate.js';
+import { register, login, me, refresh, changePassword } from '../controllers/authController.js';
+import { getUser, updateUser, deleteUser } from '../controllers/userController.js';
 import { getCategories, getCategory, createCategory, updateCategory, deleteCategory } from '../controllers/categoryController.js';
 import { getProducts, getProduct, createProduct, updateProduct, deleteProduct } from '../controllers/productController.js';
 import { getVariants, createVariant, updateVariant, deleteVariant } from '../controllers/productVariantController.js';
@@ -11,8 +13,18 @@ import { getCart, addCartItem, updateCartItem, removeCartItem } from '../control
 
 const router = Router();
 
+// Auth (public)
+router.post('/auth/register', register);
+router.post('/auth/login', login);
+router.post('/auth/refresh', refresh);
+
+router.use(authenticate);
+
+// Auth (protected)
+router.get('/auth/me', me);
+router.patch('/auth/change-password', changePassword);
+
 // Users
-router.post('/users', createUser);
 router.get('/users/:id', getUser);
 router.patch('/users/:id', updateUser);
 router.delete('/users/:id', deleteUser);
