@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import authenticate from '../middlewares/authenticate.js';
+import authorize from '../middlewares/authorize.js';
 import { register, login, me, refresh, changePassword } from '../controllers/authController.js';
 import { getUser, updateUser, deleteUser } from '../controllers/userController.js';
 import { getCategories, getCategory, createCategory, updateCategory, deleteCategory } from '../controllers/categoryController.js';
@@ -10,6 +11,7 @@ import { getPayment, createPayment } from '../controllers/paymentController.js';
 import { getCart, addCartItem, updateCartItem, removeCartItem, checkout } from '../controllers/cartController.js';
 
 const router = Router();
+const adminOnly = authorize('admin');
 
 // Auth (public)
 router.post('/auth/register', register);
@@ -22,24 +24,24 @@ router.use(authenticate);
 router.get('/auth/me', me);
 router.patch('/auth/change-password', changePassword);
 
-// Users
-router.get('/users/:id', getUser);
-router.patch('/users/:id', updateUser);
-router.delete('/users/:id', deleteUser);
+// Users (admin only)
+router.get('/users/:id', adminOnly, getUser);
+router.patch('/users/:id', adminOnly, updateUser);
+router.delete('/users/:id', adminOnly, deleteUser);
 
-// Categories
+// Categories (read: all, write: admin only)
 router.get('/categories', getCategories);
 router.get('/categories/:id', getCategory);
-router.post('/categories', createCategory);
-router.patch('/categories/:id', updateCategory);
-router.delete('/categories/:id', deleteCategory);
+router.post('/categories', adminOnly, createCategory);
+router.patch('/categories/:id', adminOnly, updateCategory);
+router.delete('/categories/:id', adminOnly, deleteCategory);
 
-// Products
+// Products (read: all, write: admin only)
 router.get('/products', getProducts);
 router.get('/products/:id', getProduct);
-router.post('/products', createProduct);
-router.patch('/products/:id', updateProduct);
-router.delete('/products/:id', deleteProduct);
+router.post('/products', adminOnly, createProduct);
+router.patch('/products/:id', adminOnly, updateProduct);
+router.delete('/products/:id', adminOnly, deleteProduct);
 
 // Reviews
 router.get('/products/:productId/reviews', getReviews);
@@ -51,7 +53,7 @@ router.delete('/reviews/:id', deleteReview);
 router.get('/orders', getOrders);
 router.get('/orders/:id', getOrder);
 router.post('/orders', createOrder);
-router.patch('/orders/:id/status', updateOrderStatus);
+router.patch('/orders/:id/status', adminOnly, updateOrderStatus);
 
 // Payments
 router.get('/orders/:orderId/payment', getPayment);
