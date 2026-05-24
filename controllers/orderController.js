@@ -4,7 +4,8 @@ import AppError from '../utils/AppError.js';
 
 export const getOrders = async (req, res, next) => {
   try {
-    const where = req.query.userId ? { userId: req.query.userId } : {};
+    // admin 可看所有訂單，一般用戶只能看自己的
+    const where = req.user.role === 'admin' ? {} : { userId: req.user.id };
     const orders = await Order.findAll({ where, include: [OrderItem] });
     res.json(orders);
   } catch (err) {
@@ -18,6 +19,9 @@ export const getOrder = async (req, res, next) => {
       include: [OrderItem, Payment],
     });
     if (!order) throw new AppError('Order not found', 404);
+    if (req.user.role !== 'admin' && order.userId !== req.user.id) {
+      throw new AppError('You do not have permission to perform this action', 403);
+    }
     res.json(order);
   } catch (err) {
     next(err);
@@ -27,7 +31,8 @@ export const getOrder = async (req, res, next) => {
 export const createOrder = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
-    const { userId, shippingAddress, note, shippingFee, discountAmount, items } = req.body;
+    const { shippingAddress, note, shippingFee, discountAmount, items } = req.body;
+    const userId = req.user.id;
 
     // 鎖定商品並檢查庫存
     for (const item of items) {
