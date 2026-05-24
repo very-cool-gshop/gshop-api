@@ -4,10 +4,28 @@ import AppError from '../utils/AppError.js';
 
 export const getOrders = async (req, res, next) => {
   try {
+    const { status, page = 1, limit = 20 } = req.query;
+
     // admin 可看所有訂單，一般用戶只能看自己的
     const where = req.user.role === 'admin' ? {} : { userId: req.user.id };
-    const orders = await Order.findAll({ where, include: [OrderItem] });
-    res.json(orders);
+    if (status) where.status = status;
+
+    const offset = (Number(page) - 1) * Number(limit);
+
+    const { count, rows } = await Order.findAndCountAll({
+      where,
+      include: [OrderItem],
+      order: [['createdAt', 'DESC']],
+      limit: Number(limit),
+      offset,
+    });
+
+    res.json({
+      total: count,
+      page: Number(page),
+      totalPages: Math.ceil(count / Number(limit)),
+      data: rows,
+    });
   } catch (err) {
     next(err);
   }

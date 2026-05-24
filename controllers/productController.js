@@ -1,10 +1,48 @@
+import { Op } from 'sequelize';
 import { Product, Review } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 
 export const getProducts = async (req, res, next) => {
   try {
-    const products = await Product.findAll();
-    res.json(products);
+    const {
+      search,
+      categoryId,
+      minPrice,
+      maxPrice,
+      sortBy = 'createdAt',
+      order = 'DESC',
+      page = 1,
+      limit = 20,
+    } = req.query;
+
+    const where = { status: 'active' };
+    if (search) where.name = { [Op.iLike]: `%${search}%` };
+    if (categoryId) where.categoryId = categoryId;
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price[Op.gte] = minPrice;
+      if (maxPrice) where.price[Op.lte] = maxPrice;
+    }
+
+    const allowedSort = ['price', 'createdAt', 'name'];
+    const sortColumn = allowedSort.includes(sortBy) ? sortBy : 'createdAt';
+    const sortOrder = order.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+
+    const offset = (Number(page) - 1) * Number(limit);
+
+    const { count, rows } = await Product.findAndCountAll({
+      where,
+      order: [[sortColumn, sortOrder]],
+      limit: Number(limit),
+      offset,
+    });
+
+    res.json({
+      total: count,
+      page: Number(page),
+      totalPages: Math.ceil(count / Number(limit)),
+      data: rows,
+    });
   } catch (err) {
     next(err);
   }
