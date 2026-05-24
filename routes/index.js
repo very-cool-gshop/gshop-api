@@ -7,7 +7,7 @@ import { getProducts, getProduct, createProduct, updateProduct, deleteProduct } 
 import { getReviews, createReview, updateReview, deleteReview } from '../controllers/reviewController.js';
 import { getOrders, getOrder, createOrder, updateOrderStatus } from '../controllers/orderController.js';
 import { getPayment, createPayment } from '../controllers/paymentController.js';
-import { getCart, addCartItem, updateCartItem, removeCartItem } from '../controllers/cartController.js';
+import { getCart, addCartItem, updateCartItem, removeCartItem, checkout } from '../controllers/cartController.js';
 
 const router = Router();
 
@@ -62,5 +62,6 @@ router.get('/cart/:userId', getCart);
 router.post('/cart/:userId/items', addCartItem);
 router.patch('/cart/:userId/items/:itemId', updateCartItem);
 router.delete('/cart/:userId/items/:itemId', removeCartItem);
+router.post('/cart/checkout', checkout);
 
 export default router;
