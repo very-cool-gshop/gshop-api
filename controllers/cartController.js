@@ -1,11 +1,11 @@
-import { Cart, CartItem, ProductVariant } from '../models/index.js';
+import { Cart, CartItem, Product } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 
 export const getCart = async (req, res, next) => {
   try {
     const [cart] = await Cart.findOrCreate({ where: { userId: req.params.userId } });
     const cartWithItems = await Cart.findByPk(cart.id, {
-      include: [{ model: CartItem, include: [ProductVariant] }],
+      include: [{ model: CartItem, include: [Product] }],
     });
     res.json(cartWithItems);
   } catch (err) {
@@ -16,10 +16,10 @@ export const getCart = async (req, res, next) => {
 export const addCartItem = async (req, res, next) => {
   try {
     const [cart] = await Cart.findOrCreate({ where: { userId: req.params.userId } });
-    const { productVariantId, quantity } = req.body;
+    const { productId, quantity } = req.body;
 
     const [item, created] = await CartItem.findOrCreate({
-      where: { cartId: cart.id, productVariantId },
+      where: { cartId: cart.id, productId },
       defaults: { quantity },
     });
 

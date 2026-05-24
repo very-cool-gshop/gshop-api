@@ -12,16 +12,12 @@ const OrderItem = sequelize.define('OrderItem', {
     allowNull: false,
     references: { model: 'orders', key: 'id' },
   },
-  productVariantId: {
+  productId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: { model: 'product_variants', key: 'id' },
+    references: { model: 'products', key: 'id' },
   },
   productName: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  variantName: {
     type: DataTypes.STRING,
     allowNull: false,
   },

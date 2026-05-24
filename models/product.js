@@ -16,13 +16,19 @@ const Product = sequelize.define('Product', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  slug: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
   description: {
     type: DataTypes.TEXT,
+  },
+  price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+  },
+  stock: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  imageUrl: {
+    type: DataTypes.STRING,
   },
   status: {
     type: DataTypes.ENUM('active', 'inactive', 'draft'),

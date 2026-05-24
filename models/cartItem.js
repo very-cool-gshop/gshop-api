@@ -12,10 +12,10 @@ const CartItem = sequelize.define('CartItem', {
     allowNull: false,
     references: { model: 'carts', key: 'id' },
   },
-  productVariantId: {
+  productId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: { model: 'product_variants', key: 'id' },
+    references: { model: 'products', key: 'id' },
   },
   quantity: {
     type: DataTypes.INTEGER,

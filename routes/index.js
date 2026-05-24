@@ -4,8 +4,6 @@ import { register, login, me, refresh, changePassword } from '../controllers/aut
 import { getUser, updateUser, deleteUser } from '../controllers/userController.js';
 import { getCategories, getCategory, createCategory, updateCategory, deleteCategory } from '../controllers/categoryController.js';
 import { getProducts, getProduct, createProduct, updateProduct, deleteProduct } from '../controllers/productController.js';
-import { getVariants, createVariant, updateVariant, deleteVariant } from '../controllers/productVariantController.js';
-import { addImage, deleteImage } from '../controllers/productImageController.js';
 import { getReviews, createReview, updateReview, deleteReview } from '../controllers/reviewController.js';
 import { getOrders, getOrder, createOrder, updateOrderStatus } from '../controllers/orderController.js';
 import { getPayment, createPayment } from '../controllers/paymentController.js';
@@ -42,16 +40,6 @@ router.get('/products/:id', getProduct);
 router.post('/products', createProduct);
 router.patch('/products/:id', updateProduct);
 router.delete('/products/:id', deleteProduct);
-
-// Product Variants
-router.get('/products/:productId/variants', getVariants);
-router.post('/products/:productId/variants', createVariant);
-router.patch('/products/:productId/variants/:variantId', updateVariant);
-router.delete('/products/:productId/variants/:variantId', deleteVariant);
-
-// Product Images
-router.post('/products/:productId/images', addImage);
-router.delete('/products/:productId/images/:imageId', deleteImage);
 
 // Reviews
 router.get('/products/:productId/reviews', getReviews);
