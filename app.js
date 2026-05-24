@@ -4,9 +4,16 @@ import sequelize from './config/db.js';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
 
+const REQUIRED_ENV = ['DATABASE_URL', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
+const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
+if (missing.length) {
+  console.error(`Missing required env variables: ${missing.join(', ')}`);
+  process.exit(1);
+}
+
 const app = express();
 app.use(express.json());
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 3001;
 
 app.use(routes);
 app.use(errorHandler);
