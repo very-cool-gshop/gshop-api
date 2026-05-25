@@ -1,12 +1,11 @@
 import sequelize from '../config/db.js';
-import { Order, OrderItem, Payment, Product } from '../models/index.js';
+import { Order, OrderItem, Payment, Product, ProductVariant, OptionValue } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 
 export const getOrders = async (req, res, next) => {
   try {
     const { status, page = 1, limit = 20 } = req.query;
 
-    // admin 可看所有訂單，一般用戶只能看自己的
     const where = req.user.role === 'admin' ? {} : { userId: req.user.id };
     if (status) where.status = status;
 
@@ -52,14 +51,14 @@ export const createOrder = async (req, res, next) => {
     const { shippingAddress, note, shippingFee, discountAmount, items } = req.body;
     const userId = req.user.id;
 
-    // 鎖定商品並檢查庫存
+    // 鎖定 variant 並檢查庫存
     for (const item of items) {
-      const product = await Product.findByPk(item.productId, { lock: true, transaction: t });
-      if (!product) throw new AppError(`Product ${item.productId} not found`, 404);
-      if (product.stock < item.quantity) {
-        throw new AppError(`Insufficient stock for "${product.name}" (available: ${product.stock})`, 409);
+      const variant = await ProductVariant.findByPk(item.variantId, { lock: true, transaction: t });
+      if (!variant) throw new AppError(`Variant ${item.variantId} not found`, 404);
+      if (variant.stock < item.quantity) {
+        throw new AppError(`Variant ${item.variantId} 庫存不足（剩餘: ${variant.stock}）`, 409);
       }
-      await product.decrement('stock', { by: item.quantity, transaction: t });
+      await variant.decrement('stock', { by: item.quantity, transaction: t });
     }
 
     const totalAmount = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
@@ -75,7 +74,9 @@ export const createOrder = async (req, res, next) => {
       items.map((item) => ({
         orderId: order.id,
         productId: item.productId,
+        variantId: item.variantId,
         productName: item.productName,
+        variantName: item.variantName,
         unitPrice: item.unitPrice,
         quantity: item.quantity,
         subtotal: item.unitPrice * item.quantity,
@@ -101,15 +102,17 @@ export const updateOrderStatus = async (req, res, next) => {
 
     const { status } = req.body;
 
-    // 取消訂單時補回庫存
+    // 取消訂單時補回 variant 庫存
     if (status === 'cancelled' && order.status !== 'cancelled') {
       const orderItems = await OrderItem.findAll({ where: { orderId: order.id }, transaction: t });
       for (const item of orderItems) {
-        await Product.increment('stock', {
-          by: item.quantity,
-          where: { id: item.productId },
-          transaction: t,
-        });
+        if (item.variantId) {
+          await ProductVariant.increment('stock', {
+            by: item.quantity,
+            where: { id: item.variantId },
+            transaction: t,
+          });
+        }
       }
     }
 

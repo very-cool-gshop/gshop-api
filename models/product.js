@@ -20,12 +20,8 @@ const Product = sequelize.define('Product', {
     type: DataTypes.TEXT,
   },
   price: {
-    type: DataTypes.DECIMAL(10, 2),
+    type: DataTypes.DECIMAL(10, 2), // 起始展示價，實際價格在 variant
     allowNull: false,
-  },
-  stock: {
-    type: DataTypes.INTEGER,
-    defaultValue: 0,
   },
   imageUrl: {
     type: DataTypes.STRING,

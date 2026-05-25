@@ -17,9 +17,17 @@ const OrderItem = sequelize.define('OrderItem', {
     allowNull: false,
     references: { model: 'products', key: 'id' },
   },
+  variantId: {
+    type: DataTypes.INTEGER,
+    allowNull: true, // nullable，避免 variant 被刪後歷史訂單壞掉
+    references: { model: 'product_variants', key: 'id' },
+  },
   productName: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  variantName: {
+    type: DataTypes.STRING, // 快照，e.g. "紅 / M"
   },
   unitPrice: {
     type: DataTypes.DECIMAL(10, 2),

@@ -1,30 +1,29 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 
-const CartItem = sequelize.define('CartItem', {
+const OptionValue = sequelize.define('OptionValue', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  cartId: {
+  optionId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: { model: 'carts', key: 'id' },
+    references: { model: 'product_options', key: 'id' },
   },
-  variantId: {
-    type: DataTypes.INTEGER,
+  value: {
+    type: DataTypes.STRING, // e.g. "紅", "S"
     allowNull: false,
-    references: { model: 'product_variants', key: 'id' },
   },
-  quantity: {
+  sortOrder: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 1,
+    defaultValue: 0,
   },
 }, {
-  tableName: 'cart_items',
+  tableName: 'option_values',
   underscored: true,
+  timestamps: false,
 });
 
-export default CartItem;
+export default OptionValue;

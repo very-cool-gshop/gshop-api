@@ -1,30 +1,29 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 
-const CartItem = sequelize.define('CartItem', {
+const ProductOption = sequelize.define('ProductOption', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-  cartId: {
+  productId: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: { model: 'carts', key: 'id' },
+    references: { model: 'products', key: 'id' },
   },
-  variantId: {
-    type: DataTypes.INTEGER,
+  name: {
+    type: DataTypes.STRING, // e.g. "顏色", "尺寸"
     allowNull: false,
-    references: { model: 'product_variants', key: 'id' },
   },
-  quantity: {
+  sortOrder: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 1,
+    defaultValue: 0,
   },
 }, {
-  tableName: 'cart_items',
+  tableName: 'product_options',
   underscored: true,
+  timestamps: false,
 });
 
-export default CartItem;
+export default ProductOption;

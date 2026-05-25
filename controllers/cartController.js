@@ -1,12 +1,20 @@
 import sequelize from '../config/db.js';
-import { Cart, CartItem, Product, Order, OrderItem } from '../models/index.js';
+import { Cart, CartItem, ProductVariant, OptionValue, Product, Order, OrderItem } from '../models/index.js';
 import AppError from '../utils/AppError.js';
+
+const variantInclude = {
+  model: ProductVariant,
+  include: [
+    { model: Product, attributes: ['id', 'name', 'imageUrl'] },
+    { model: OptionValue, through: { attributes: [] } },
+  ],
+};
 
 export const getCart = async (req, res, next) => {
   try {
     const [cart] = await Cart.findOrCreate({ where: { userId: req.params.userId } });
     const cartWithItems = await Cart.findByPk(cart.id, {
-      include: [{ model: CartItem, include: [Product] }],
+      include: [{ model: CartItem, include: [variantInclude] }],
     });
     res.json(cartWithItems);
   } catch (err) {
@@ -17,10 +25,13 @@ export const getCart = async (req, res, next) => {
 export const addCartItem = async (req, res, next) => {
   try {
     const [cart] = await Cart.findOrCreate({ where: { userId: req.params.userId } });
-    const { productId, quantity } = req.body;
+    const { variantId, quantity } = req.body;
+
+    const variant = await ProductVariant.findByPk(variantId);
+    if (!variant) throw new AppError('Variant not found', 404);
 
     const [item, created] = await CartItem.findOrCreate({
-      where: { cartId: cart.id, productId },
+      where: { cartId: cart.id, variantId },
       defaults: { quantity },
     });
 
@@ -62,7 +73,7 @@ export const checkout = async (req, res, next) => {
 
     const cart = await Cart.findOne({
       where: { userId },
-      include: [{ model: CartItem, include: [Product] }],
+      include: [{ model: CartItem, include: [variantInclude] }],
       transaction: t,
     });
 
@@ -70,17 +81,18 @@ export const checkout = async (req, res, next) => {
       throw new AppError('Cart is empty', 400);
     }
 
-    // 鎖定商品並檢查庫存
+    // 鎖定 variant 並檢查庫存
     for (const item of cart.CartItems) {
-      const product = await Product.findByPk(item.productId, { lock: true, transaction: t });
-      if (product.stock < item.quantity) {
-        throw new AppError(`Insufficient stock for "${product.name}" (available: ${product.stock})`, 409);
+      const variant = await ProductVariant.findByPk(item.variantId, { lock: true, transaction: t });
+      if (variant.stock < item.quantity) {
+        const name = item.ProductVariant.Product.name;
+        throw new AppError(`"${name}" 庫存不足（剩餘: ${variant.stock}）`, 409);
       }
-      await product.decrement('stock', { by: item.quantity, transaction: t });
+      await variant.decrement('stock', { by: item.quantity, transaction: t });
     }
 
     const totalAmount = cart.CartItems.reduce(
-      (sum, item) => sum + Number(item.Product.price) * item.quantity,
+      (sum, item) => sum + Number(item.ProductVariant.price) * item.quantity,
       0,
     );
 
@@ -94,14 +106,20 @@ export const checkout = async (req, res, next) => {
     }, { transaction: t });
 
     await OrderItem.bulkCreate(
-      cart.CartItems.map((item) => ({
-        orderId: order.id,
-        productId: item.productId,
-        productName: item.Product.name,
-        unitPrice: item.Product.price,
-        quantity: item.quantity,
-        subtotal: Number(item.Product.price) * item.quantity,
-      })),
+      cart.CartItems.map((item) => {
+        const variant = item.ProductVariant;
+        const variantName = variant.OptionValues?.map((v) => v.value).join(' / ') || '';
+        return {
+          orderId: order.id,
+          productId: variant.productId,
+          variantId: variant.id,
+          productName: variant.Product.name,
+          variantName,
+          unitPrice: variant.price,
+          quantity: item.quantity,
+          subtotal: Number(variant.price) * item.quantity,
+        };
+      }),
       { transaction: t },
     );
 
