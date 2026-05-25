@@ -9,12 +9,16 @@ import { getReviews, createReview, updateReview, deleteReview } from '../control
 import { getOrders, getOrder, createOrder, updateOrderStatus } from '../controllers/orderController.js';
 import { getPayment, createPayment } from '../controllers/paymentController.js';
 import { getCart, addCartItem, updateCartItem, removeCartItem, checkout } from '../controllers/cartController.js';
+import { getSliders, adminGetSliders, createSlider, updateSlider, deleteSlider } from '../controllers/sliderController.js';
 
 const router = Router();
 const adminOnly = authorize('admin');
 
 // Health check
 router.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+
+// Sliders (前台公開)
+router.get('/sliders', getSliders);
 
 // Auth (public)
 router.post('/auth/register', register);
@@ -61,6 +65,12 @@ router.patch('/orders/:id/status', adminOnly, updateOrderStatus);
 // Payments
 router.get('/orders/:orderId/payment', getPayment);
 router.post('/orders/:orderId/payment', createPayment);
+
+// Sliders (後台管理，admin only)
+router.get('/admin/sliders', adminOnly, adminGetSliders);
+router.post('/admin/sliders', adminOnly, createSlider);
+router.patch('/admin/sliders/:id', adminOnly, updateSlider);
+router.delete('/admin/sliders/:id', adminOnly, deleteSlider);
 
 // Cart
 router.get('/cart/:userId', getCart);

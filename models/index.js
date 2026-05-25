@@ -7,6 +7,7 @@ import Order from './order.js';
 import OrderItem from './orderItem.js';
 import Payment from './payment.js';
 import Review from './review.js';
+import Slider from './slider.js';
 
 // Category
 Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
@@ -35,9 +36,12 @@ OrderItem.belongsTo(Product, { foreignKey: 'productId' });
 // Payment
 Payment.belongsTo(Order, { foreignKey: 'orderId' });
 
+// Slider
+Slider.belongsTo(Product, { foreignKey: 'productId' });
+
 // Review
 Review.belongsTo(User, { foreignKey: 'userId' });
 Review.belongsTo(Product, { foreignKey: 'productId' });
 Review.belongsTo(OrderItem, { foreignKey: 'orderItemId' });
 
-export { User, Category, Product, Cart, CartItem, Order, OrderItem, Payment, Review };
+export { User, Category, Product, Cart, CartItem, Order, OrderItem, Payment, Review, Slider };
