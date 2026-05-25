@@ -36,3 +36,15 @@ export const uploadToGCS = (file) =>
     });
     stream.end(file.buffer);
   });
+
+export const uploadBufferToGCS = (buffer, filename, contentType) =>
+  new Promise((resolve, reject) => {
+    const blob = bucket.file(filename);
+    const stream = blob.createWriteStream({ contentType });
+
+    stream.on('error', reject);
+    stream.on('finish', () => {
+      resolve(`https://storage.googleapis.com/${process.env.GCS_BUCKET_NAME}/${filename}`);
+    });
+    stream.end(buffer);
+  });
