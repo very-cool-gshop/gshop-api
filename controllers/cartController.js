@@ -1,12 +1,11 @@
 import sequelize from '../config/db.js';
-import { Cart, CartItem, ProductVariant, OptionValue, Product, Order, OrderItem } from '../models/index.js';
+import { Cart, CartItem, ProductVariant, Product, Order, OrderItem } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 
 const variantInclude = {
   model: ProductVariant,
   include: [
     { model: Product, attributes: ['id', 'name', 'imageUrl'] },
-    { model: OptionValue, through: { attributes: [] } },
   ],
 };
 
@@ -108,7 +107,7 @@ export const checkout = async (req, res, next) => {
     await OrderItem.bulkCreate(
       cart.CartItems.map((item) => {
         const variant = item.ProductVariant;
-        const variantName = variant.OptionValues?.map((v) => v.value).join(' / ') || '';
+        const variantName = variant.spec || '';
         return {
           orderId: order.id,
           productId: variant.productId,

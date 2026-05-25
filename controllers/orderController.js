@@ -1,5 +1,5 @@
 import sequelize from '../config/db.js';
-import { Order, OrderItem, Payment, Product, ProductVariant, OptionValue } from '../models/index.js';
+import { Order, OrderItem, Payment, Product, ProductVariant } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 
 export const getOrders = async (req, res, next) => {
