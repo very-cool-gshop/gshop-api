@@ -1,10 +1,7 @@
 import User from './user.js';
 import Category from './category.js';
 import Product from './product.js';
-import ProductOption from './productOption.js';
-import OptionValue from './optionValue.js';
 import ProductVariant from './productVariant.js';
-import VariantOptionValue from './variantOptionValue.js';
 import Cart from './cart.js';
 import CartItem from './cartItem.js';
 import Order from './order.js';
@@ -21,20 +18,10 @@ Category.hasMany(Product, { foreignKey: 'categoryId' });
 // Product
 Product.belongsTo(Category, { foreignKey: 'categoryId' });
 Product.hasMany(Review, { foreignKey: 'productId' });
-Product.hasMany(ProductOption, { foreignKey: 'productId' });
 Product.hasMany(ProductVariant, { foreignKey: 'productId' });
-
-// ProductOption
-ProductOption.belongsTo(Product, { foreignKey: 'productId' });
-ProductOption.hasMany(OptionValue, { foreignKey: 'optionId' });
-
-// OptionValue
-OptionValue.belongsTo(ProductOption, { foreignKey: 'optionId' });
-OptionValue.belongsToMany(ProductVariant, { through: VariantOptionValue, foreignKey: 'optionValueId' });
 
 // ProductVariant
 ProductVariant.belongsTo(Product, { foreignKey: 'productId' });
-ProductVariant.belongsToMany(OptionValue, { through: VariantOptionValue, foreignKey: 'variantId' });
 
 // Cart
 User.hasOne(Cart, { foreignKey: 'userId' });
@@ -66,7 +53,7 @@ Slider.belongsTo(Product, { foreignKey: 'productId' });
 
 export {
   User, Category,
-  Product, ProductOption, OptionValue, ProductVariant, VariantOptionValue,
+  Product, ProductVariant,
   Cart, CartItem,
   Order, OrderItem, Payment,
   Review, Slider,

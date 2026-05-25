@@ -27,6 +27,9 @@ const ProductVariant = sequelize.define('ProductVariant', {
   imageUrl: {
     type: DataTypes.STRING,
   },
+  spec: {
+    type: DataTypes.STRING,
+  },
 }, {
   tableName: 'product_variants',
   underscored: true,

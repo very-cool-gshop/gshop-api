@@ -6,8 +6,6 @@ import { getUser, updateUser, deleteUser } from '../controllers/userController.j
 import { getCategories, getCategory, createCategory, updateCategory, deleteCategory } from '../controllers/categoryController.js';
 import {
   getProducts, getProduct, createProduct, updateProduct, deleteProduct,
-  createOption, updateOption, deleteOption,
-  createOptionValue, updateOptionValue, deleteOptionValue,
   createVariant, updateVariant, deleteVariant,
 } from '../controllers/productController.js';
 import { getReviews, createReview, updateReview, deleteReview } from '../controllers/reviewController.js';
@@ -54,16 +52,6 @@ router.get('/products/:id', getProduct);
 router.post('/products', adminOnly, createProduct);
 router.patch('/products/:id', adminOnly, updateProduct);
 router.delete('/products/:id', adminOnly, deleteProduct);
-
-// Product Options (admin only)
-router.post('/products/:id/options', adminOnly, createOption);
-router.patch('/products/:id/options/:optionId', adminOnly, updateOption);
-router.delete('/products/:id/options/:optionId', adminOnly, deleteOption);
-
-// Option Values (admin only)
-router.post('/products/:id/options/:optionId/values', adminOnly, createOptionValue);
-router.patch('/products/:id/options/:optionId/values/:valueId', adminOnly, updateOptionValue);
-router.delete('/products/:id/options/:optionId/values/:valueId', adminOnly, deleteOptionValue);
 
 // Product Variants (admin only)
 router.post('/products/:id/variants', adminOnly, createVariant);

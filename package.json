@@ -1,5 +1,8 @@
 {
   "type": "module",
+  "scripts": {
+    "dev": "node app.js"
+  },
   "dependencies": {
     "@google-cloud/storage": "^7.19.0",
     "bcrypt": "^6.0.0",
