@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import { Product, Review } from '../models/index.js';
 import AppError from '../utils/AppError.js';
+import { parseImage, uploadToGCS } from '../utils/upload.js';
 
 export const getProducts = async (req, res, next) => {
   try {
@@ -62,7 +63,9 @@ export const getProduct = async (req, res, next) => {
 
 export const createProduct = async (req, res, next) => {
   try {
-    const { categoryId, name, description, price, stock, imageUrl, status } = req.body;
+    await parseImage(req, res);
+    const { categoryId, name, description, price, stock, status } = req.body;
+    const imageUrl = req.file ? await uploadToGCS(req.file) : undefined;
     const product = await Product.create({ categoryId, name, description, price, stock, imageUrl, status });
     res.status(201).json(product);
   } catch (err) {
@@ -72,9 +75,11 @@ export const createProduct = async (req, res, next) => {
 
 export const updateProduct = async (req, res, next) => {
   try {
+    await parseImage(req, res);
     const product = await Product.findByPk(req.params.id);
     if (!product) throw new AppError('Product not found', 404);
-    const { categoryId, name, description, price, stock, imageUrl, status } = req.body;
+    const { categoryId, name, description, price, stock, status } = req.body;
+    const imageUrl = req.file ? await uploadToGCS(req.file) : undefined;
     await product.update({ categoryId, name, description, price, stock, imageUrl, status });
     res.json(product);
   } catch (err) {

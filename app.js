@@ -12,9 +12,9 @@ if (missing.length) {
 }
 
 const app = express();
-app.use(express.json());
 const PORT = process.env.PORT || 3001;
 
+app.use(express.json());
 app.use(routes);
 app.use(errorHandler);
 

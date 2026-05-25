@@ -13,6 +13,9 @@ import { getCart, addCartItem, updateCartItem, removeCartItem, checkout } from '
 const router = Router();
 const adminOnly = authorize('admin');
 
+// Health check
+router.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+
 // Auth (public)
 router.post('/auth/register', register);
 router.post('/auth/login', login);
