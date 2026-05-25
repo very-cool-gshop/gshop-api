@@ -24,6 +24,9 @@ const User = sequelize.define('User', {
   phone: {
     type: DataTypes.STRING,
   },
+  avatar: {
+    type: DataTypes.STRING,
+  },
   role: {
     type: DataTypes.ENUM('customer', 'admin'),
     defaultValue: 'customer',
@@ -34,6 +37,8 @@ const User = sequelize.define('User', {
   hooks: {
     beforeCreate: async (user) => {
       user.password = await bcrypt.hash(user.password, 12);
+      const seed = Math.random().toString(36).slice(2, 10);
+      user.avatar = `https://api.dicebear.com/9.x/shapes/svg?seed=${seed}`;
     },
     beforeUpdate: async (user) => {
       if (user.changed('password')) {
