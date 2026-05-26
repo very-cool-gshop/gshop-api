@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import authenticate from '../middlewares/authenticate.js';
 import authorize from '../middlewares/authorize.js';
-import { register, login, me, refresh, changePassword } from '../controllers/authController.js';
+import { register, login, me, changePassword } from '../controllers/authController.js';
 import { getUser, updateUser, deleteUser } from '../controllers/userController.js';
 import { getCategories, getCategory, createCategory, updateCategory, deleteCategory } from '../controllers/categoryController.js';
 import {
@@ -26,7 +26,6 @@ router.get('/sliders', getSliders);
 // Auth (public)
 router.post('/auth/register', register);
 router.post('/auth/login', login);
-router.post('/auth/refresh', refresh);
 
 router.use(authenticate);
 
