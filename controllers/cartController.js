@@ -107,7 +107,7 @@ export const checkout = async (req, res, next) => {
     await OrderItem.bulkCreate(
       cart.CartItems.map((item) => {
         const variant = item.ProductVariant;
-        const variantName = variant.spec || '';
+        const variantName = variant.name || '';
         return {
           orderId: order.id,
           productId: variant.productId,

@@ -1,5 +1,6 @@
 import { Op } from 'sequelize';
 import { Product, ProductVariant, Review } from '../models/index.js';
+import sequelize from '../config/db.js';
 import AppError from '../utils/AppError.js';
 import { parseImage, uploadToGCS } from '../utils/upload.js';
 
@@ -66,10 +67,29 @@ export const getProduct = async (req, res, next) => {
 export const createProduct = async (req, res, next) => {
   try {
     await parseImage(req, res);
-    const { categoryId, name, description, price, status } = req.body;
+    const { categoryId, name, description, price, status, variants } = req.body;
     const imageUrl = req.file ? await uploadToGCS(req.file) : undefined;
-    const product = await Product.create({ categoryId, name, description, price, imageUrl, status });
-    res.status(201).json(product);
+
+    const result = await sequelize.transaction(async (t) => {
+      const product = await Product.create(
+        { categoryId, name, description, price, imageUrl, status },
+        { transaction: t },
+      );
+
+      if (variants) {
+        const list = typeof variants === 'string' ? JSON.parse(variants) : variants;
+        if (Array.isArray(list) && list.length > 0) {
+          await ProductVariant.bulkCreate(
+            list.map(v => ({ ...v, productId: product.id })),
+            { transaction: t },
+          );
+        }
+      }
+
+      return Product.findByPk(product.id, { include: [ProductVariant], transaction: t });
+    });
+
+    res.status(201).json(result);
   } catch (err) {
     next(err);
   }
@@ -106,8 +126,8 @@ export const createVariant = async (req, res, next) => {
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) throw new AppError('Product not found', 404);
-    const { sku, price, stock, imageUrl, spec } = req.body;
-    const variant = await ProductVariant.create({ productId: product.id, sku, price, stock, imageUrl, spec });
+    const { price, stock, imageUrl, name } = req.body;
+    const variant = await ProductVariant.create({ productId: product.id, price, stock, imageUrl, name });
     res.status(201).json(variant);
   } catch (err) {
     next(err);
@@ -118,8 +138,8 @@ export const updateVariant = async (req, res, next) => {
   try {
     const variant = await ProductVariant.findByPk(req.params.variantId);
     if (!variant) throw new AppError('Variant not found', 404);
-    const { sku, price, stock, imageUrl, spec } = req.body;
-    await variant.update({ sku, price, stock, imageUrl, spec });
+    const { price, stock, imageUrl, name } = req.body;
+    await variant.update({ price, stock, imageUrl, name });
     res.json(variant);
   } catch (err) {
     next(err);
