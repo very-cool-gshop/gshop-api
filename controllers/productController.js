@@ -1,6 +1,5 @@
 import { Op } from 'sequelize';
 import { Product, ProductVariant, Review } from '../models/index.js';
-import sequelize from '../config/db.js';
 import AppError from '../utils/AppError.js';
 import { parseImage, uploadToGCS } from '../utils/upload.js';
 
@@ -67,29 +66,10 @@ export const getProduct = async (req, res, next) => {
 export const createProduct = async (req, res, next) => {
   try {
     await parseImage(req, res);
-    const { categoryId, name, description, price, status, variants } = req.body;
+    const { categoryId, name, description, price, status } = req.body;
     const imageUrl = req.file ? await uploadToGCS(req.file) : undefined;
-
-    const result = await sequelize.transaction(async (t) => {
-      const product = await Product.create(
-        { categoryId, name, description, price, imageUrl, status },
-        { transaction: t },
-      );
-
-      if (variants) {
-        const list = typeof variants === 'string' ? JSON.parse(variants) : variants;
-        if (Array.isArray(list) && list.length > 0) {
-          await ProductVariant.bulkCreate(
-            list.map(v => ({ ...v, productId: product.id })),
-            { transaction: t },
-          );
-        }
-      }
-
-      return Product.findByPk(product.id, { include: [ProductVariant], transaction: t });
-    });
-
-    res.status(201).json(result);
+    const product = await Product.create({ categoryId, name, description, price, imageUrl, status });
+    res.status(201).json(product);
   } catch (err) {
     next(err);
   }
