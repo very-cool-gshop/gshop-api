@@ -9,6 +9,7 @@ export const getProducts = async (req, res, next) => {
   try {
     const {
       search,
+      status,
       categoryId,
       minPrice,
       maxPrice,
@@ -18,7 +19,8 @@ export const getProducts = async (req, res, next) => {
       limit = 20,
     } = req.query;
 
-    const where = { status: 'active' };
+    const where = {};
+    if (status) where.status = status;
     if (search) where.name = { [Op.iLike]: `%${search}%` };
     if (categoryId) where.categoryId = categoryId;
     if (minPrice || maxPrice) {
