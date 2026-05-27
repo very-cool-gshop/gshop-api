@@ -106,9 +106,11 @@ export const deleteProduct = async (req, res, next) => {
 
 export const createVariant = async (req, res, next) => {
   try {
+    await parseImage(req, res);
     const product = await Product.findByPk(req.params.id);
     if (!product) throw new AppError('Product not found', 404);
-    const { price, stock, imageUrl, name } = req.body;
+    const { price, stock, name } = req.body;
+    const imageUrl = req.file ? await uploadToGCS(req.file) : undefined;
     const variant = await ProductVariant.create({ productId: product.id, price, stock, imageUrl, name });
     res.status(201).json(variant);
   } catch (err) {
@@ -118,9 +120,11 @@ export const createVariant = async (req, res, next) => {
 
 export const updateVariant = async (req, res, next) => {
   try {
+    await parseImage(req, res);
     const variant = await ProductVariant.findByPk(req.params.variantId);
     if (!variant) throw new AppError('Variant not found', 404);
-    const { price, stock, imageUrl, name } = req.body;
+    const { price, stock, name } = req.body;
+    const imageUrl = req.file ? await uploadToGCS(req.file) : undefined;
     await variant.update({ price, stock, imageUrl, name });
     res.json(variant);
   } catch (err) {
