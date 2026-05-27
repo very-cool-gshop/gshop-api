@@ -11,8 +11,6 @@ import Review from './review.js';
 import Slider from './slider.js';
 
 // Category
-Category.belongsTo(Category, { as: 'parent', foreignKey: 'parentId' });
-Category.hasMany(Category, { as: 'children', foreignKey: 'parentId' });
 Category.hasMany(Product, { foreignKey: 'categoryId' });
 
 // Product

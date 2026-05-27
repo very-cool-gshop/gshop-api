@@ -4,9 +4,7 @@ import AppError from '../utils/AppError.js';
 export const getCategories = async (req, res, next) => {
   try {
     const categories = await Category.findAll({
-      where: { parentId: null },
-      include: [{ model: Category, as: 'children' }],
-      order: [['sortOrder', 'ASC']],
+      order: [['sortOrder', 'ASC'], ['id', 'ASC']],
     });
     res.json(categories);
   } catch (err) {
@@ -16,9 +14,7 @@ export const getCategories = async (req, res, next) => {
 
 export const getCategory = async (req, res, next) => {
   try {
-    const category = await Category.findByPk(req.params.id, {
-      include: [{ model: Category, as: 'children' }],
-    });
+    const category = await Category.findByPk(req.params.id);
     if (!category) throw new AppError('Category not found', 404);
     res.json(category);
   } catch (err) {
@@ -28,8 +24,8 @@ export const getCategory = async (req, res, next) => {
 
 export const createCategory = async (req, res, next) => {
   try {
-    const { parentId, name, slug, sortOrder } = req.body;
-    const category = await Category.create({ parentId, name, slug, sortOrder });
+    const { name, sortOrder } = req.body;
+    const category = await Category.create({ name, sortOrder });
     res.status(201).json(category);
   } catch (err) {
     next(err);
@@ -40,8 +36,8 @@ export const updateCategory = async (req, res, next) => {
   try {
     const category = await Category.findByPk(req.params.id);
     if (!category) throw new AppError('Category not found', 404);
-    const { parentId, name, slug, sortOrder } = req.body;
-    await category.update({ parentId, name, slug, sortOrder });
+    const { name, sortOrder } = req.body;
+    await category.update({ name, sortOrder });
     res.json(category);
   } catch (err) {
     next(err);
