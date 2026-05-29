@@ -1,6 +1,8 @@
 import { Op } from 'sequelize';
-import { Product, ProductVariant, ProductImage, ProductImageMap, VariantImageMap, Review } from '../models/index.js';
+import { Product, ProductVariant, ProductImage, Review } from '../models/index.js';
 import AppError from '../utils/AppError.js';
+
+const imageInclude = { model: ProductImage, as: 'image' };
 
 // ── Products ──────────────────────────────────────────────
 
@@ -36,6 +38,7 @@ export const getProducts = async (req, res, next) => {
 
     const { count, rows } = await Product.findAndCountAll({
       where,
+      include: [imageInclude],
       order: [[sortColumn, sortOrder]],
       limit: Number(limit),
       offset,
@@ -59,9 +62,9 @@ export const getProduct = async (req, res, next) => {
         Review,
         {
           model: ProductVariant,
-          include: [{ model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } }],
+          include: [imageInclude],
         },
-        { model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } },
+        imageInclude,
       ],
     });
     if (!product) throw new AppError('Product not found', 404);
@@ -73,16 +76,9 @@ export const getProduct = async (req, res, next) => {
 
 export const createProduct = async (req, res, next) => {
   try {
-    const { categoryId, name, description, price, status, imageIds = [] } = req.body;
-    const product = await Product.create({ categoryId, name, description, price, status });
-    if (imageIds.length) {
-      await ProductImageMap.bulkCreate(
-        imageIds.map((imageId, i) => ({ productId: product.id, imageId, sortOrder: i }))
-      );
-    }
-    const result = await Product.findByPk(product.id, {
-      include: [{ model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } }],
-    });
+    const { categoryId, name, description, price, status, imageId = null } = req.body;
+    const product = await Product.create({ categoryId, name, description, price, status, imageId });
+    const result = await Product.findByPk(product.id, { include: [imageInclude] });
     res.status(201).json(result);
   } catch (err) {
     next(err);
@@ -93,19 +89,9 @@ export const updateProduct = async (req, res, next) => {
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) throw new AppError('Product not found', 404);
-    const { categoryId, name, description, price, status, imageIds } = req.body;
-    await product.update({ categoryId, name, description, price, status });
-    if (imageIds) {
-      await ProductImageMap.destroy({ where: { productId: product.id } });
-      if (imageIds.length) {
-        await ProductImageMap.bulkCreate(
-          imageIds.map((imageId, i) => ({ productId: product.id, imageId, sortOrder: i }))
-        );
-      }
-    }
-    const result = await Product.findByPk(product.id, {
-      include: [{ model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } }],
-    });
+    const { categoryId, name, description, price, status, imageId } = req.body;
+    await product.update({ categoryId, name, description, price, status, imageId });
+    const result = await Product.findByPk(product.id, { include: [imageInclude] });
     res.json(result);
   } catch (err) {
     next(err);
@@ -129,16 +115,9 @@ export const createVariant = async (req, res, next) => {
   try {
     const product = await Product.findByPk(req.params.id);
     if (!product) throw new AppError('Product not found', 404);
-    const { price, stock, name, imageIds = [] } = req.body;
-    const variant = await ProductVariant.create({ productId: product.id, price, stock, name });
-    if (imageIds.length) {
-      await VariantImageMap.bulkCreate(
-        imageIds.map((imageId, i) => ({ variantId: variant.id, imageId, sortOrder: i }))
-      );
-    }
-    const result = await ProductVariant.findByPk(variant.id, {
-      include: [{ model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } }],
-    });
+    const { price, stock, name, imageId = null } = req.body;
+    const variant = await ProductVariant.create({ productId: product.id, price, stock, name, imageId });
+    const result = await ProductVariant.findByPk(variant.id, { include: [imageInclude] });
     res.status(201).json(result);
   } catch (err) {
     next(err);
@@ -149,19 +128,9 @@ export const updateVariant = async (req, res, next) => {
   try {
     const variant = await ProductVariant.findByPk(req.params.variantId);
     if (!variant) throw new AppError('Variant not found', 404);
-    const { price, stock, name, imageIds } = req.body;
-    await variant.update({ price, stock, name });
-    if (imageIds) {
-      await VariantImageMap.destroy({ where: { variantId: variant.id } });
-      if (imageIds.length) {
-        await VariantImageMap.bulkCreate(
-          imageIds.map((imageId, i) => ({ variantId: variant.id, imageId, sortOrder: i }))
-        );
-      }
-    }
-    const result = await ProductVariant.findByPk(variant.id, {
-      include: [{ model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } }],
-    });
+    const { price, stock, name, imageId } = req.body;
+    await variant.update({ price, stock, name, imageId });
+    const result = await ProductVariant.findByPk(variant.id, { include: [imageInclude] });
     res.json(result);
   } catch (err) {
     next(err);

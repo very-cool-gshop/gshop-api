@@ -27,6 +27,11 @@ const Product = sequelize.define('Product', {
     type: DataTypes.ENUM('active', 'inactive', 'draft'),
     defaultValue: 'draft',
   },
+  imageId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: { model: 'product_images', key: 'id' },
+  },
 }, {
   tableName: 'products',
   underscored: true,

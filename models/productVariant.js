@@ -23,6 +23,11 @@ const ProductVariant = sequelize.define('ProductVariant', {
   name: {
     type: DataTypes.STRING,
   },
+  imageId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: { model: 'product_images', key: 'id' },
+  },
 }, {
   tableName: 'product_variants',
   underscored: true,
