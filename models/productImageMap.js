@@ -1,31 +1,25 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 
-const ProductVariant = sequelize.define('ProductVariant', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
-  },
+const ProductImageMap = sequelize.define('ProductImageMap', {
   productId: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: { model: 'products', key: 'id' },
   },
-  price: {
-    type: DataTypes.DECIMAL(10, 2),
+  imageId: {
+    type: DataTypes.INTEGER,
     allowNull: false,
+    references: { model: 'product_images', key: 'id' },
   },
-  stock: {
+  sortOrder: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
   },
-  name: {
-    type: DataTypes.STRING,
-  },
 }, {
-  tableName: 'product_variants',
+  tableName: 'product_image_maps',
   underscored: true,
+  timestamps: false,
 });
 
-export default ProductVariant;
+export default ProductImageMap;

@@ -2,6 +2,9 @@ import User from './user.js';
 import Category from './category.js';
 import Product from './product.js';
 import ProductVariant from './productVariant.js';
+import ProductImage from './productImage.js';
+import ProductImageMap from './productImageMap.js';
+import VariantImageMap from './variantImageMap.js';
 import Cart from './cart.js';
 import CartItem from './cartItem.js';
 import Order from './order.js';
@@ -17,9 +20,13 @@ Category.hasMany(Product, { foreignKey: 'categoryId' });
 Product.belongsTo(Category, { foreignKey: 'categoryId' });
 Product.hasMany(Review, { foreignKey: 'productId' });
 Product.hasMany(ProductVariant, { foreignKey: 'productId' });
+Product.belongsToMany(ProductImage, { through: ProductImageMap, foreignKey: 'productId', otherKey: 'imageId', as: 'images' });
+ProductImage.belongsToMany(Product, { through: ProductImageMap, foreignKey: 'imageId', otherKey: 'productId' });
 
 // ProductVariant
 ProductVariant.belongsTo(Product, { foreignKey: 'productId' });
+ProductVariant.belongsToMany(ProductImage, { through: VariantImageMap, foreignKey: 'variantId', otherKey: 'imageId', as: 'images' });
+ProductImage.belongsToMany(ProductVariant, { through: VariantImageMap, foreignKey: 'imageId', otherKey: 'variantId' });
 
 // Cart
 User.hasOne(Cart, { foreignKey: 'userId' });
@@ -52,6 +59,7 @@ Slider.belongsTo(Product, { foreignKey: 'productId' });
 export {
   User, Category,
   Product, ProductVariant,
+  ProductImage, ProductImageMap, VariantImageMap,
   Cart, CartItem,
   Order, OrderItem, Payment,
   Review, Slider,

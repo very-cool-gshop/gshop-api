@@ -1,7 +1,6 @@
 import { Op } from 'sequelize';
-import { Product, ProductVariant, Review } from '../models/index.js';
+import { Product, ProductVariant, ProductImage, ProductImageMap, VariantImageMap, Review } from '../models/index.js';
 import AppError from '../utils/AppError.js';
-import { parseImage, uploadToGCS } from '../utils/upload.js';
 
 // ── Products ──────────────────────────────────────────────
 
@@ -56,7 +55,14 @@ export const getProducts = async (req, res, next) => {
 export const getProduct = async (req, res, next) => {
   try {
     const product = await Product.findByPk(req.params.id, {
-      include: [Review, ProductVariant],
+      include: [
+        Review,
+        {
+          model: ProductVariant,
+          include: [{ model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } }],
+        },
+        { model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } },
+      ],
     });
     if (!product) throw new AppError('Product not found', 404);
     res.json(product);
@@ -67,11 +73,17 @@ export const getProduct = async (req, res, next) => {
 
 export const createProduct = async (req, res, next) => {
   try {
-    await parseImage(req, res);
-    const { categoryId, name, description, price, status } = req.body;
-    const imageUrl = req.file ? await uploadToGCS(req.file) : undefined;
-    const product = await Product.create({ categoryId, name, description, price, imageUrl, status });
-    res.status(201).json(product);
+    const { categoryId, name, description, price, status, imageIds = [] } = req.body;
+    const product = await Product.create({ categoryId, name, description, price, status });
+    if (imageIds.length) {
+      await ProductImageMap.bulkCreate(
+        imageIds.map((imageId, i) => ({ productId: product.id, imageId, sortOrder: i }))
+      );
+    }
+    const result = await Product.findByPk(product.id, {
+      include: [{ model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } }],
+    });
+    res.status(201).json(result);
   } catch (err) {
     next(err);
   }
@@ -79,13 +91,22 @@ export const createProduct = async (req, res, next) => {
 
 export const updateProduct = async (req, res, next) => {
   try {
-    await parseImage(req, res);
     const product = await Product.findByPk(req.params.id);
     if (!product) throw new AppError('Product not found', 404);
-    const { categoryId, name, description, price, status } = req.body;
-    const imageUrl = req.file ? await uploadToGCS(req.file) : undefined;
-    await product.update({ categoryId, name, description, price, imageUrl, status });
-    res.json(product);
+    const { categoryId, name, description, price, status, imageIds } = req.body;
+    await product.update({ categoryId, name, description, price, status });
+    if (imageIds) {
+      await ProductImageMap.destroy({ where: { productId: product.id } });
+      if (imageIds.length) {
+        await ProductImageMap.bulkCreate(
+          imageIds.map((imageId, i) => ({ productId: product.id, imageId, sortOrder: i }))
+        );
+      }
+    }
+    const result = await Product.findByPk(product.id, {
+      include: [{ model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } }],
+    });
+    res.json(result);
   } catch (err) {
     next(err);
   }
@@ -106,13 +127,19 @@ export const deleteProduct = async (req, res, next) => {
 
 export const createVariant = async (req, res, next) => {
   try {
-    await parseImage(req, res);
     const product = await Product.findByPk(req.params.id);
     if (!product) throw new AppError('Product not found', 404);
-    const { price, stock, name } = req.body;
-    const imageUrl = req.file ? await uploadToGCS(req.file) : undefined;
-    const variant = await ProductVariant.create({ productId: product.id, price, stock, imageUrl, name });
-    res.status(201).json(variant);
+    const { price, stock, name, imageIds = [] } = req.body;
+    const variant = await ProductVariant.create({ productId: product.id, price, stock, name });
+    if (imageIds.length) {
+      await VariantImageMap.bulkCreate(
+        imageIds.map((imageId, i) => ({ variantId: variant.id, imageId, sortOrder: i }))
+      );
+    }
+    const result = await ProductVariant.findByPk(variant.id, {
+      include: [{ model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } }],
+    });
+    res.status(201).json(result);
   } catch (err) {
     next(err);
   }
@@ -120,13 +147,22 @@ export const createVariant = async (req, res, next) => {
 
 export const updateVariant = async (req, res, next) => {
   try {
-    await parseImage(req, res);
     const variant = await ProductVariant.findByPk(req.params.variantId);
     if (!variant) throw new AppError('Variant not found', 404);
-    const { price, stock, name } = req.body;
-    const imageUrl = req.file ? await uploadToGCS(req.file) : undefined;
-    await variant.update({ price, stock, imageUrl, name });
-    res.json(variant);
+    const { price, stock, name, imageIds } = req.body;
+    await variant.update({ price, stock, name });
+    if (imageIds) {
+      await VariantImageMap.destroy({ where: { variantId: variant.id } });
+      if (imageIds.length) {
+        await VariantImageMap.bulkCreate(
+          imageIds.map((imageId, i) => ({ variantId: variant.id, imageId, sortOrder: i }))
+        );
+      }
+    }
+    const result = await ProductVariant.findByPk(variant.id, {
+      include: [{ model: ProductImage, as: 'images', through: { attributes: ['sortOrder'] } }],
+    });
+    res.json(result);
   } catch (err) {
     next(err);
   }

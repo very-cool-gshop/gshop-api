@@ -8,6 +8,7 @@ import {
   getProducts, getProduct, createProduct, updateProduct, deleteProduct,
   createVariant, updateVariant, deleteVariant,
 } from '../controllers/productController.js';
+import { getImages, uploadImage, updateImage, deleteImage } from '../controllers/productImageController.js';
 import { getReviews, createReview, updateReview, deleteReview } from '../controllers/reviewController.js';
 import { getOrders, getOrder, createOrder, updateOrderStatus } from '../controllers/orderController.js';
 import { getPayment, createPayment } from '../controllers/paymentController.js';
@@ -51,6 +52,12 @@ router.get('/products/:id', getProduct);
 router.post('/products', adminOnly, createProduct);
 router.patch('/products/:id', adminOnly, updateProduct);
 router.delete('/products/:id', adminOnly, deleteProduct);
+
+// Media Library (admin write, public read)
+router.get('/images', getImages);
+router.post('/images', adminOnly, uploadImage);
+router.patch('/images/:imageId', adminOnly, updateImage);
+router.delete('/images/:imageId', adminOnly, deleteImage);
 
 // Product Variants (admin only)
 router.post('/products/:id/variants', adminOnly, createVariant);

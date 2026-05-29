@@ -5,7 +5,7 @@ import path from 'path';
 const storage = new Storage();
 const bucket = storage.bucket(process.env.GCS_BUCKET_NAME);
 
-const multerInstance = multer({
+const imageMulter = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
@@ -16,9 +16,18 @@ const multerInstance = multer({
   },
 });
 
+
 export const parseImage = (req, res) =>
   new Promise((resolve, reject) => {
-    multerInstance.single('image')(req, res, (err) => {
+    imageMulter.single('image')(req, res, (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+
+export const parseMedia = (req, res) =>
+  new Promise((resolve, reject) => {
+    imageMulter.single('media')(req, res, (err) => {
       if (err) reject(err);
       else resolve();
     });

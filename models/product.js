@@ -23,9 +23,6 @@ const Product = sequelize.define('Product', {
     type: DataTypes.DECIMAL(10, 2), // 起始展示價，實際價格在 variant
     allowNull: false,
   },
-  imageUrl: {
-    type: DataTypes.STRING,
-  },
   status: {
     type: DataTypes.ENUM('active', 'inactive', 'draft'),
     defaultValue: 'draft',
