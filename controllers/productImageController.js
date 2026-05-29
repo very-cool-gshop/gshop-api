@@ -1,12 +1,15 @@
+import { Op } from 'sequelize';
 import { ProductImage } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 import { parseMedia, uploadToGCS } from '../utils/upload.js';
 
 export const getImages = async (req, res, next) => {
   try {
-    const { page = 1, limit = 50 } = req.query;
+    const { page = 1, limit = 50, search } = req.query;
     const offset = (Number(page) - 1) * Number(limit);
+    const where = search ? { filename: { [Op.iLike]: `%${search}%` } } : {};
     const { count, rows } = await ProductImage.findAndCountAll({
+      where,
       order: [['createdAt', 'DESC']],
       limit: Number(limit),
       offset,
