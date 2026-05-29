@@ -57,3 +57,11 @@ export const uploadBufferToGCS = (buffer, filename, contentType) =>
     });
     stream.end(buffer);
   });
+
+export const deleteFromGCS = async (url) => {
+  const prefix = `https://storage.googleapis.com/${process.env.GCS_BUCKET_NAME}/`;
+  const filename = url.startsWith(prefix) ? url.slice(prefix.length) : url;
+  console.log('[GCS] deleting:', filename);
+  await bucket.file(filename).delete();
+  console.log('[GCS] deleted:', filename);
+};

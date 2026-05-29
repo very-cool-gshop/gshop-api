@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
 import { ProductImage } from '../models/index.js';
 import AppError from '../utils/AppError.js';
-import { parseMedia, uploadToGCS } from '../utils/upload.js';
+import { parseMedia, uploadToGCS, deleteFromGCS } from '../utils/upload.js';
 
 export const getImages = async (req, res, next) => {
   try {
@@ -57,6 +57,7 @@ export const deleteImage = async (req, res, next) => {
   try {
     const image = await ProductImage.findByPk(req.params.imageId);
     if (!image) throw new AppError('Image not found', 404);
+    await deleteFromGCS(image.url);
     await image.destroy();
     res.status(204).send();
   } catch (err) {
