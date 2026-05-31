@@ -62,9 +62,9 @@ export const getProduct = async (req, res, next) => {
         Review,
         {
           model: ProductVariant,
-          include: [imageInclude],
+          include: [{ model: ProductImage, as: 'image' }],
         },
-        imageInclude,
+        { model: ProductImage, as: 'image' },
       ],
     });
     if (!product) throw new AppError('Product not found', 404);

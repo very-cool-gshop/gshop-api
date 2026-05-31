@@ -28,6 +28,13 @@ router.get('/sliders', getSliders);
 router.post('/auth/register', register);
 router.post('/auth/login', login);
 
+// 前台公開 (storefront read-only)
+router.get('/categories', getCategories);
+router.get('/categories/:id', getCategory);
+router.get('/products', getProducts);
+router.get('/products/:id', getProduct);
+router.get('/products/:productId/reviews', getReviews);
+
 router.use(authenticate);
 
 // Auth (protected)
@@ -39,16 +46,12 @@ router.get('/users/:id', adminOnly, getUser);
 router.patch('/users/:id', adminOnly, updateUser);
 router.delete('/users/:id', adminOnly, deleteUser);
 
-// Categories (read: all, write: admin only)
-router.get('/categories', getCategories);
-router.get('/categories/:id', getCategory);
+// Categories (write: admin only)
 router.post('/categories', adminOnly, createCategory);
 router.patch('/categories/:id', adminOnly, updateCategory);
 router.delete('/categories/:id', adminOnly, deleteCategory);
 
-// Products (read: all, write: admin only)
-router.get('/products', getProducts);
-router.get('/products/:id', getProduct);
+// Products (write: admin only)
 router.post('/products', adminOnly, createProduct);
 router.patch('/products/:id', adminOnly, updateProduct);
 router.delete('/products/:id', adminOnly, deleteProduct);
@@ -64,8 +67,7 @@ router.post('/products/:id/variants', adminOnly, createVariant);
 router.patch('/products/:id/variants/:variantId', adminOnly, updateVariant);
 router.delete('/products/:id/variants/:variantId', adminOnly, deleteVariant);
 
-// Reviews
-router.get('/products/:productId/reviews', getReviews);
+// Reviews (write: protected)
 router.post('/products/:productId/reviews', createReview);
 router.patch('/reviews/:id', updateReview);
 router.delete('/reviews/:id', deleteReview);
