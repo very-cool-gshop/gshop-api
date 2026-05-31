@@ -1,11 +1,15 @@
 import sequelize from '../config/db.js';
-import { Cart, CartItem, ProductVariant, Product, Order, OrderItem } from '../models/index.js';
+import { Cart, CartItem, ProductVariant, Product, ProductImage, Order, OrderItem } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 
 const variantInclude = {
   model: ProductVariant,
   include: [
-    { model: Product, attributes: ['id', 'name', 'imageUrl'] },
+    {
+      model: Product,
+      attributes: ['id', 'name'],
+      include: [{ model: ProductImage, as: 'image', attributes: ['url'] }],
+    },
   ],
 };
 
