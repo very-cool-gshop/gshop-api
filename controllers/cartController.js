@@ -72,7 +72,7 @@ export const checkout = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
     const userId = req.user.id;
-    const { shippingAddress, note, shippingFee, discountAmount } = req.body;
+    const { address, recipientName, recipientPhone, note, discountAmount } = req.body;
 
     const cart = await Cart.findOne({
       where: { userId },
@@ -101,9 +101,10 @@ export const checkout = async (req, res, next) => {
 
     const order = await Order.create({
       userId,
-      shippingAddress,
+      address,
+      recipientName,
+      recipientPhone,
       note,
-      shippingFee: shippingFee || 0,
       discountAmount: discountAmount || 0,
       totalAmount,
     }, { transaction: t });

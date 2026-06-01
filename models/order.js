@@ -20,16 +20,20 @@ const Order = sequelize.define('Order', {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
   },
-  shippingFee: {
-    type: DataTypes.DECIMAL(10, 2),
-    defaultValue: 0,
-  },
   discountAmount: {
     type: DataTypes.DECIMAL(10, 2),
     defaultValue: 0,
   },
-  shippingAddress: {
-    type: DataTypes.JSONB,
+  address: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  recipientName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  recipientPhone: {
+    type: DataTypes.STRING,
     allowNull: false,
   },
   note: {

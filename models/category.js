@@ -11,6 +11,9 @@ const Category = sequelize.define('Category', {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  description: {
+    type: DataTypes.TEXT,
+  },
   sortOrder: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
