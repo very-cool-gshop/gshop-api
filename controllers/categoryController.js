@@ -24,8 +24,8 @@ export const getCategory = async (req, res, next) => {
 
 export const createCategory = async (req, res, next) => {
   try {
-    const { name, sortOrder } = req.body;
-    const category = await Category.create({ name, sortOrder });
+    const { name, description, sortOrder } = req.body;
+    const category = await Category.create({ name, description, sortOrder });
     res.status(201).json(category);
   } catch (err) {
     next(err);
@@ -36,8 +36,8 @@ export const updateCategory = async (req, res, next) => {
   try {
     const category = await Category.findByPk(req.params.id);
     if (!category) throw new AppError('Category not found', 404);
-    const { name, sortOrder } = req.body;
-    await category.update({ name, sortOrder });
+    const { name, description, sortOrder } = req.body;
+    await category.update({ name, description, sortOrder });
     res.json(category);
   } catch (err) {
     next(err);
