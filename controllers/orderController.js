@@ -33,7 +33,7 @@ export const getOrders = async (req, res, next) => {
 export const getOrder = async (req, res, next) => {
   try {
     const order = await Order.findByPk(req.params.id, {
-      include: [OrderItem, Payment, { model: User, attributes: ['id', 'username', 'email'] }],
+      include: [OrderItem, Payment, { model: User, attributes: ['id', 'name', 'email'] }],
     });
     if (!order) throw new AppError('Order not found', 404);
     if (req.user.role !== 'admin' && order.userId !== req.user.id) {
