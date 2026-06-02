@@ -1,5 +1,5 @@
 import sequelize from '../config/db.js';
-import { Order, OrderItem, Payment, Product, ProductVariant } from '../models/index.js';
+import { Order, OrderItem, Payment, Product, ProductVariant, User } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 
 export const getOrders = async (req, res, next) => {
@@ -13,7 +13,7 @@ export const getOrders = async (req, res, next) => {
 
     const { count, rows } = await Order.findAndCountAll({
       where,
-      include: [OrderItem],
+      include: [OrderItem, { model: User, attributes: ['id', 'username', 'email'] }],
       order: [['createdAt', 'DESC']],
       limit: Number(limit),
       offset,
@@ -33,7 +33,7 @@ export const getOrders = async (req, res, next) => {
 export const getOrder = async (req, res, next) => {
   try {
     const order = await Order.findByPk(req.params.id, {
-      include: [OrderItem, Payment],
+      include: [OrderItem, Payment, { model: User, attributes: ['id', 'username', 'email'] }],
     });
     if (!order) throw new AppError('Order not found', 404);
     if (req.user.role !== 'admin' && order.userId !== req.user.id) {
