@@ -1,6 +1,18 @@
 import { User } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 
+export const getUsers = async (req, res, next) => {
+  try {
+    const users = await User.findAll({
+      attributes: { exclude: ['password'] },
+      order: [['id', 'ASC']],
+    });
+    res.json(users);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const getUser = async (req, res, next) => {
   try {
     const user = await User.findByPk(req.params.id, {

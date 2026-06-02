@@ -2,7 +2,7 @@ import { Router } from 'express';
 import authenticate from '../middlewares/authenticate.js';
 import authorize from '../middlewares/authorize.js';
 import { register, login, me, changePassword } from '../controllers/authController.js';
-import { getUser, updateUser, deleteUser } from '../controllers/userController.js';
+import { getUsers, getUser, updateUser, deleteUser } from '../controllers/userController.js';
 import { getCategories, getCategory, createCategory, updateCategory, deleteCategory } from '../controllers/categoryController.js';
 import {
   getProducts, getProduct, createProduct, updateProduct, deleteProduct,
@@ -42,6 +42,7 @@ router.get('/auth/me', me);
 router.patch('/auth/change-password', changePassword);
 
 // Users (admin only)
+router.get('/users', adminOnly, getUsers);
 router.get('/users/:id', adminOnly, getUser);
 router.patch('/users/:id', adminOnly, updateUser);
 router.delete('/users/:id', adminOnly, deleteUser);
