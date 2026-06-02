@@ -13,7 +13,7 @@ export const getOrders = async (req, res, next) => {
 
     const { count, rows } = await Order.findAndCountAll({
       where,
-      include: [OrderItem, { model: User, attributes: ['id', 'username', 'email'] }],
+      include: [OrderItem],
       order: [['createdAt', 'DESC']],
       limit: Number(limit),
       offset,
