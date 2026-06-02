@@ -1,9 +1,16 @@
+import { Op } from 'sequelize';
 import { User } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 
 export const getUsers = async (req, res, next) => {
   try {
+    const { q } = req.query;
+    const where = q
+      ? { [Op.or]: [{ name: { [Op.like]: `%${q}%` } }, { email: { [Op.like]: `%${q}%` } }] }
+      : {};
+
     const users = await User.findAll({
+      where,
       attributes: { exclude: ['password'] },
       order: [['id', 'ASC']],
     });
