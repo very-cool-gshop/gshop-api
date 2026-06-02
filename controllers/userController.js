@@ -4,10 +4,10 @@ import AppError from '../utils/AppError.js';
 
 export const getUsers = async (req, res, next) => {
   try {
-    const { q } = req.query;
-    const where = q
-      ? { [Op.or]: [{ name: { [Op.like]: `%${q}%` } }, { email: { [Op.like]: `%${q}%` } }] }
-      : {};
+    const { search, role } = req.query;
+    const where = {};
+    if (search) where[Op.or] = [{ name: { [Op.like]: `%${search}%` } }, { email: { [Op.like]: `%${search}%` } }];
+    if (role) where.role = role;
 
     const users = await User.findAll({
       where,
