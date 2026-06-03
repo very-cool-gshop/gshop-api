@@ -1,19 +1,21 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { parseImage } from '../utils/upload.js';
 import AppError from '../utils/AppError.js';
+import { Category } from '../models/index.js';
 
 const anthropic = new Anthropic();
 
-const PRODUCT_SCHEMA = {
+const buildSchema = (categories) => ({
   type: 'object',
   properties: {
     name:        { type: 'string',  description: 'Product name in Traditional Chinese' },
     price:       { type: 'integer', description: 'Estimated retail price in TWD (no decimals)' },
     description: { type: 'string',  description: 'Brief product description in Traditional Chinese' },
+    categoryId:  { type: 'integer', description: `Most suitable category ID from the list: ${categories.map(c => `${c.id}=${c.name}`).join(', ')}` },
   },
-  required: ['name', 'price', 'description'],
+  required: ['name', 'price', 'description', 'categoryId'],
   additionalProperties: false,
-};
+});
 
 export const analyzeProductImage = async (req, res, next) => {
   try {
@@ -27,11 +29,13 @@ export const analyzeProductImage = async (req, res, next) => {
       imageSource = { type: 'base64', media_type: req.file.mimetype, data: req.file.buffer.toString('base64') };
     }
 
+    const categories = await Category.findAll({ order: [['sortOrder', 'ASC'], ['id', 'ASC']] });
+
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
       output_config: {
-        format: { type: 'json_schema', schema: PRODUCT_SCHEMA },
+        format: { type: 'json_schema', schema: buildSchema(categories) },
       },
       messages: [
         {
