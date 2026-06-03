@@ -1,7 +1,7 @@
 import { Op } from 'sequelize';
 import { ProductImage } from '../models/index.js';
 import AppError from '../utils/AppError.js';
-import { parseMedia, uploadToGCS, deleteFromGCS } from '../utils/upload.js';
+import { parseMultipleMedia, uploadToGCS, deleteFromGCS } from '../utils/upload.js';
 
 export const getImages = async (req, res, next) => {
   try {
@@ -27,15 +27,15 @@ export const getImages = async (req, res, next) => {
 
 export const uploadImage = async (req, res, next) => {
   try {
-    await parseMedia(req, res);
-    if (!req.file) throw new AppError('No file uploaded', 400);
-    const url = await uploadToGCS(req.file);
-    const image = await ProductImage.create({
-      url,
-      filename: req.file.originalname,
-      size: req.file.size,
-    });
-    res.status(201).json(image);
+    await parseMultipleMedia(req, res);
+    if (!req.files?.length) throw new AppError('No file uploaded', 400);
+    const images = await Promise.all(
+      req.files.map(async (file) => {
+        const url = await uploadToGCS(file);
+        return ProductImage.create({ url, filename: file.originalname, size: file.size });
+      })
+    );
+    res.status(201).json(images);
   } catch (err) {
     next(err);
   }

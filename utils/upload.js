@@ -33,6 +33,14 @@ export const parseMedia = (req, res) =>
     });
   });
 
+export const parseMultipleMedia = (req, res, maxCount = 20) =>
+  new Promise((resolve, reject) => {
+    imageMulter.array('media', maxCount)(req, res, (err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+
 export const uploadToGCS = (file) =>
   new Promise((resolve, reject) => {
     const filename = `products/${Date.now()}-${file.originalname.replace(/\s+/g, '_')}`;
