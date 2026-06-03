@@ -86,10 +86,10 @@ router.get('/orders/:orderId/payment', getPayment);
 router.post('/orders/:orderId/payment', createPayment);
 
 // Cart
-router.get('/cart/:userId', getCart);
-router.post('/cart/:userId/items', addCartItem);
-router.patch('/cart/:userId/items/:itemId', updateCartItem);
-router.delete('/cart/:userId/items/:itemId', removeCartItem);
+router.get('/cart', getCart);
+router.post('/cart/items', addCartItem);
+router.patch('/cart/items/:itemId', updateCartItem);
+router.delete('/cart/items/:itemId', removeCartItem);
 router.post('/cart/checkout', checkout);
 
 // Sliders (後台管理，admin only)

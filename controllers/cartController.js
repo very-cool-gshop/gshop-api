@@ -5,17 +5,14 @@ import AppError from '../utils/AppError.js';
 const variantInclude = {
   model: ProductVariant,
   include: [
-    {
-      model: Product,
-      attributes: ['id', 'name'],
-      include: [{ model: ProductImage, as: 'image', attributes: ['url'] }],
-    },
+    { model: ProductImage, as: 'image', attributes: ['url'] },
+    { model: Product, attributes: ['id', 'name'] },
   ],
 };
 
 export const getCart = async (req, res, next) => {
   try {
-    const [cart] = await Cart.findOrCreate({ where: { userId: req.params.userId } });
+    const [cart] = await Cart.findOrCreate({ where: { userId: req.user.id } });
     const cartWithItems = await Cart.findByPk(cart.id, {
       include: [{ model: CartItem, include: [variantInclude] }],
     });
@@ -27,7 +24,7 @@ export const getCart = async (req, res, next) => {
 
 export const addCartItem = async (req, res, next) => {
   try {
-    const [cart] = await Cart.findOrCreate({ where: { userId: req.params.userId } });
+    const [cart] = await Cart.findOrCreate({ where: { userId: req.user.id } });
     const { variantId, quantity } = req.body;
 
     const variant = await ProductVariant.findByPk(variantId);
