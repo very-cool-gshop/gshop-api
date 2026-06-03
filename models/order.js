@@ -3,9 +3,9 @@ import sequelize from '../config/db.js';
 
 const Order = sequelize.define('Order', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
-    autoIncrement: true,
   },
   userId: {
     type: DataTypes.INTEGER,

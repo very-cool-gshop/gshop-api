@@ -8,7 +8,7 @@ const Payment = sequelize.define('Payment', {
     autoIncrement: true,
   },
   orderId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     allowNull: false,
     references: { model: 'orders', key: 'id' },
   },
