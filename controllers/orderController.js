@@ -4,10 +4,19 @@ import AppError from '../utils/AppError.js';
 
 export const getOrders = async (req, res, next) => {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
+    const { status, orderId, userId, page = 1, limit = 20 } = req.query;
 
     const where = req.user.role === 'admin' ? {} : { userId: req.user.id };
     if (status) where.status = status;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (orderId) {
+      if (!uuidRegex.test(orderId)) return res.json({ total: 0, page: Number(page), totalPages: 0, data: [] });
+      where.id = orderId;
+    }
+    if (userId && req.user.role === 'admin') {
+      if (!uuidRegex.test(userId)) return res.json({ total: 0, page: Number(page), totalPages: 0, data: [] });
+      where.userId = userId;
+    }
 
     const offset = (Number(page) - 1) * Number(limit);
 
