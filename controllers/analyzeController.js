@@ -17,8 +17,15 @@ const PRODUCT_SCHEMA = {
 
 export const analyzeProductImage = async (req, res, next) => {
   try {
-    await parseImage(req, res);
-    if (!req.file) throw new AppError('No image uploaded', 400);
+    let imageSource;
+
+    if (req.body?.url) {
+      imageSource = { type: 'url', url: req.body.url };
+    } else {
+      await parseImage(req, res);
+      if (!req.file) throw new AppError('No image uploaded or URL provided', 400);
+      imageSource = { type: 'base64', media_type: req.file.mimetype, data: req.file.buffer.toString('base64') };
+    }
 
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -30,14 +37,7 @@ export const analyzeProductImage = async (req, res, next) => {
         {
           role: 'user',
           content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: req.file.mimetype,
-                data: req.file.buffer.toString('base64'),
-              },
-            },
+            { type: 'image', source: imageSource },
             { type: 'text', text: '請分析這張商品圖片，用繁體中文回答，提供商品名稱、預估台幣售價（整數，無小數點）與簡短描述。' },
           ],
         },
