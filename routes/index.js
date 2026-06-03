@@ -14,6 +14,7 @@ import { getOrders, getOrder, createOrder, updateOrderStatus } from '../controll
 import { getPayment, createPayment } from '../controllers/paymentController.js';
 import { getCart, addCartItem, updateCartItem, removeCartItem, checkout } from '../controllers/cartController.js';
 import { getSliders, adminGetSliders, createSlider, updateSlider, deleteSlider } from '../controllers/sliderController.js';
+import { analyzeProductImage } from '../controllers/analyzeController.js';
 
 const router = Router();
 const adminOnly = authorize('admin');
@@ -53,6 +54,7 @@ router.patch('/categories/:id', adminOnly, updateCategory);
 router.delete('/categories/:id', adminOnly, deleteCategory);
 
 // Products (write: admin only)
+router.post('/products/analyze', adminOnly, analyzeProductImage);
 router.post('/products', adminOnly, createProduct);
 router.patch('/products/:id', adminOnly, updateProduct);
 router.delete('/products/:id', adminOnly, deleteProduct);

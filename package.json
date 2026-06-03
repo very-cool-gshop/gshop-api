@@ -4,6 +4,7 @@
     "dev": "node app.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.100.1",
     "@google-cloud/storage": "^7.19.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
