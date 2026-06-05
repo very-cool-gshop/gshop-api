@@ -26,6 +26,7 @@ export const getOrders = async (req, res, next) => {
       order: [['createdAt', 'DESC']],
       limit: Number(limit),
       offset,
+      distinct: true,
     });
 
     res.json({
