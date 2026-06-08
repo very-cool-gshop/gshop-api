@@ -38,7 +38,7 @@ async function runJob(job) {
 
 export function startJobs() {
   for (const job of jobs) {
-    cron.schedule(job.schedule, () => runJob(job));
+    cron.schedule(job.schedule, () => runJob(job), { timezone: 'Asia/Taipei' });
     console.log(`[jobs] Registered: ${job.name} (${job.schedule})`);
   }
 }
