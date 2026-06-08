@@ -11,7 +11,7 @@ import {
 import { getImages, uploadImage, updateImage, deleteImage } from '../controllers/productImageController.js';
 import { getReviews, createReview, updateReview, deleteReview } from '../controllers/reviewController.js';
 import { getOrders, getOrder, createOrder, updateOrderStatus } from '../controllers/orderController.js';
-import { getPayment, createPayment } from '../controllers/paymentController.js';
+import { getPayment, confirmPayment } from '../controllers/paymentController.js';
 import { getCart, addCartItem, updateCartItem, removeCartItem, checkout } from '../controllers/cartController.js';
 import { getSliders, adminGetSliders, createSlider, updateSlider, deleteSlider } from '../controllers/sliderController.js';
 import { analyzeProductImage } from '../controllers/analyzeController.js';
@@ -85,7 +85,7 @@ router.patch('/orders/:id/status', adminOnly, updateOrderStatus);
 
 // Payments
 router.get('/orders/:orderId/payment', getPayment);
-router.post('/orders/:orderId/payment', createPayment);
+router.post('/orders/:orderId/payment/confirm', confirmPayment);
 
 // Cart
 router.get('/cart', getCart);

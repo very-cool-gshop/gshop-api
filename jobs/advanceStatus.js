@@ -1,5 +1,5 @@
 import sequelize from '../config/db.js';
-import { Order, OrderItem, ProductVariant } from '../models/index.js';
+import { Order, OrderItem, ProductVariant, Payment } from '../models/index.js';
 import { Op } from 'sequelize';
 
 export async function advanceOrderStatus() {
@@ -19,6 +19,7 @@ export async function advanceOrderStatus() {
       }
     }
     await order.update({ status: 'cancelled' });
+    await Payment.update({ status: 'failed' }, { where: { orderId: order.id, status: 'pending' } });
   }
 
   // paid 超過 1 天 → shipped

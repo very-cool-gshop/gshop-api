@@ -11,22 +11,19 @@ export const getPayment = async (req, res, next) => {
   }
 };
 
-export const createPayment = async (req, res, next) => {
+export const confirmPayment = async (req, res, next) => {
   try {
+    const payment = await Payment.findOne({ where: { orderId: req.params.orderId } });
+    if (!payment) throw new AppError('Payment not found', 404);
+    if (payment.status === 'paid') throw new AppError('Payment already confirmed', 409);
+
+    const { transactionId } = req.body;
+    await payment.update({ status: 'paid', transactionId, paidAt: new Date() });
+
     const order = await Order.findByPk(req.params.orderId);
-    if (!order) throw new AppError('Order not found', 404);
+    await order.update({ status: 'paid' });
 
-    const existing = await Payment.findOne({ where: { orderId: order.id } });
-    if (existing) throw new AppError('Payment already exists for this order', 409);
-
-    const { method, transactionId } = req.body;
-    const payment = await Payment.create({
-      orderId: order.id,
-      method,
-      amount: order.totalAmount,
-      transactionId,
-    });
-    res.status(201).json(payment);
+    res.json(payment);
   } catch (err) {
     next(err);
   }

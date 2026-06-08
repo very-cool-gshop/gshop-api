@@ -1,5 +1,5 @@
 import sequelize from '../config/db.js';
-import { Cart, CartItem, ProductVariant, Product, ProductImage, Order, OrderItem } from '../models/index.js';
+import { Cart, CartItem, ProductVariant, Product, ProductImage, Order, OrderItem, Payment } from '../models/index.js';
 import AppError from '../utils/AppError.js';
 
 const variantInclude = {
@@ -69,7 +69,9 @@ export const checkout = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
     const userId = req.user.id;
-    const { address, recipientName, recipientPhone, note, discountAmount } = req.body;
+    const { address, recipientName, recipientPhone, note, discountAmount, paymentMethod } = req.body;
+
+    if (!paymentMethod) throw new AppError('paymentMethod is required', 400);
 
     const cart = await Cart.findOne({
       where: { userId },
@@ -124,11 +126,18 @@ export const checkout = async (req, res, next) => {
       { transaction: t },
     );
 
+    await Payment.create({
+      orderId: order.id,
+      method: paymentMethod,
+      status: 'pending',
+      amount: totalAmount,
+    }, { transaction: t });
+
     await CartItem.destroy({ where: { cartId: cart.id }, transaction: t });
 
     await t.commit();
 
-    const result = await Order.findByPk(order.id, { include: [OrderItem] });
+    const result = await Order.findByPk(order.id, { include: [OrderItem, Payment] });
     res.status(201).json(result);
   } catch (err) {
     await t.rollback();

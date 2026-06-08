@@ -58,7 +58,9 @@ export const getOrder = async (req, res, next) => {
 export const createOrder = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
-    const { shippingAddress, note, shippingFee, discountAmount, items } = req.body;
+    const { shippingAddress, note, shippingFee, discountAmount, items, paymentMethod } = req.body;
+
+    if (!paymentMethod) throw new AppError('paymentMethod is required', 400);
     const userId = req.user.id;
 
     // 鎖定 variant 並檢查庫存
@@ -94,9 +96,16 @@ export const createOrder = async (req, res, next) => {
       { transaction: t },
     );
 
+    await Payment.create({
+      orderId: order.id,
+      method: paymentMethod,
+      status: 'pending',
+      amount: totalAmount,
+    }, { transaction: t });
+
     await t.commit();
 
-    const result = await Order.findByPk(order.id, { include: [OrderItem] });
+    const result = await Order.findByPk(order.id, { include: [OrderItem, Payment] });
     res.status(201).json(result);
   } catch (err) {
     await t.rollback();
