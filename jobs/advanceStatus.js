@@ -33,5 +33,5 @@ export async function advanceOrderStatus() {
     WHERE status = 'shipped' AND updated_at < :cutoff
   `, { replacements: { cutoff: daysAgo(2) }, type: sequelize.QueryTypes.UPDATE });
 
-  console.log(`[advanceStatus] cancelled=${pendingOrders.length} shipped=${shippedCount} delivered=${deliveredCount}`);
+  return `cancelled=${pendingOrders.length} shipped=${shippedCount} delivered=${deliveredCount}`;
 }

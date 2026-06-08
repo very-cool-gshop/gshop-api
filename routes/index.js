@@ -16,6 +16,7 @@ import { getCart, addCartItem, updateCartItem, removeCartItem, checkout } from '
 import { getSliders, adminGetSliders, createSlider, updateSlider, deleteSlider } from '../controllers/sliderController.js';
 import { analyzeProductImage } from '../controllers/analyzeController.js';
 import { getDashboard, getLowStock } from '../controllers/dashboardController.js';
+import { getJobs, triggerJob, getJobLogs } from '../controllers/jobController.js';
 
 const router = Router();
 const adminOnly = authorize('admin');
@@ -96,6 +97,11 @@ router.post('/cart/checkout', checkout);
 // Dashboard (admin only)
 router.get('/dashboard', adminOnly, getDashboard);
 router.get('/dashboard/low-stock', adminOnly, getLowStock);
+
+// Jobs (admin only)
+router.get('/admin/jobs', adminOnly, getJobs);
+router.get('/admin/jobs/logs', adminOnly, getJobLogs);
+router.post('/admin/jobs/:name/run', adminOnly, triggerJob);
 
 // Sliders (後台管理，admin only)
 router.get('/admin/sliders', adminOnly, adminGetSliders);

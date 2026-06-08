@@ -82,5 +82,5 @@ export async function buildDailySnapshot(targetDate) {
     paymentMethods: paymentMethods.map(r => ({ method: r.method, count: parseInt(r.count), amount: parseFloat(r.amount) })),
   });
 
-  console.log(`[dailySnapshot] Built snapshot for ${dateStr}`);
+  return `Built snapshot for ${dateStr}`;
 }

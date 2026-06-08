@@ -11,6 +11,7 @@ import Payment from './payment.js';
 import Review from './review.js';
 import Slider from './slider.js';
 import DailySnapshot from './dailySnapshot.js';
+import JobLog from './jobLog.js';
 
 // Category
 Category.hasMany(Product, { foreignKey: 'categoryId' });
@@ -60,4 +61,5 @@ export {
   Order, OrderItem, Payment,
   Review, Slider,
   DailySnapshot,
+  JobLog,
 };

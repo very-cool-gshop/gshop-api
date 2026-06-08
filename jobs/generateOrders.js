@@ -62,5 +62,5 @@ export async function generateOrders() {
     });
   }
 
-  console.log(`[generateOrders] Created ${count} orders`);
+  return `Created ${count} orders`;
 }
