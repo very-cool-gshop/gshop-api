@@ -37,12 +37,16 @@ async function seed() {
   const [users] = await sequelize.query(
     "SELECT id, name, phone, address FROM users WHERE role = 'customer' AND address IS NOT NULL"
   );
-  const [products] = await sequelize.query(
-    "SELECT id, name, price FROM products WHERE status = 'active'"
+  const [variants] = await sequelize.query(
+    `SELECT pv.id AS variant_id, pv.name AS variant_name, pv.price,
+            p.id AS product_id, p.name AS product_name
+     FROM product_variants pv
+     JOIN products p ON p.id = pv.product_id
+     WHERE p.status = 'active'`
   );
 
-  if (!users.length || !products.length) {
-    console.error('No users or products found');
+  if (!users.length || !variants.length) {
+    console.error('No users or variants found');
     process.exit(1);
   }
 
@@ -54,11 +58,11 @@ async function seed() {
     const status = deriveStatus(createdAt);
     const user = pick(users);
     const itemCount = randInt(1, 4);
-    const shuffled = [...products].sort(() => Math.random() - 0.5).slice(0, itemCount);
+    const shuffled = [...variants].sort(() => Math.random() - 0.5).slice(0, itemCount);
 
-    const items = shuffled.map(p => {
+    const items = shuffled.map(v => {
       const qty = randInt(1, 3);
-      return { product: p, quantity: qty, subtotal: parseFloat(p.price) * qty };
+      return { variant: v, quantity: qty, subtotal: parseFloat(v.price) * qty };
     });
 
     const totalAmount = items.reduce((sum, it) => sum + it.subtotal, 0);
@@ -78,9 +82,11 @@ async function seed() {
 
     await OrderItem.bulkCreate(items.map(it => ({
       orderId: order.id,
-      productId: it.product.id,
-      productName: it.product.name,
-      unitPrice: parseFloat(it.product.price),
+      productId: it.variant.product_id,
+      variantId: it.variant.variant_id,
+      productName: it.variant.product_name,
+      variantName: it.variant.variant_name,
+      unitPrice: parseFloat(it.variant.price),
       quantity: it.quantity,
       subtotal: it.subtotal,
     })));
