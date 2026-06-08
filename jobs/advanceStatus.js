@@ -22,16 +22,16 @@ export async function advanceOrderStatus() {
   }
 
   // paid 超過 1 天 → shipped
-  const [shippedCount] = await sequelize.query(`
+  const shipped = await sequelize.query(`
     UPDATE orders SET status = 'shipped', updated_at = NOW()
-    WHERE status = 'paid' AND updated_at < :cutoff
-  `, { replacements: { cutoff: daysAgo(1) }, type: sequelize.QueryTypes.UPDATE });
+    WHERE status = 'paid' AND updated_at < :cutoff RETURNING id
+  `, { replacements: { cutoff: daysAgo(1) }, type: sequelize.QueryTypes.SELECT });
 
   // shipped 超過 2 天 → delivered
-  const [deliveredCount] = await sequelize.query(`
+  const delivered = await sequelize.query(`
     UPDATE orders SET status = 'delivered', updated_at = NOW()
-    WHERE status = 'shipped' AND updated_at < :cutoff
-  `, { replacements: { cutoff: daysAgo(2) }, type: sequelize.QueryTypes.UPDATE });
+    WHERE status = 'shipped' AND updated_at < :cutoff RETURNING id
+  `, { replacements: { cutoff: daysAgo(2) }, type: sequelize.QueryTypes.SELECT });
 
-  return `cancelled=${pendingOrders.length} shipped=${shippedCount} delivered=${deliveredCount}`;
+  return `cancelled=${pendingOrders.length} shipped=${shipped.length} delivered=${delivered.length}`;
 }
