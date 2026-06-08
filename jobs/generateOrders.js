@@ -18,7 +18,7 @@ export async function generateOrders() {
   );
   if (!users.length || !variants.length) return;
 
-  const count = randInt(3, 8);
+  const count = randInt(1, 3);
   const now = new Date();
 
   for (let i = 0; i < count; i++) {
