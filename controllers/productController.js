@@ -78,6 +78,7 @@ export const createProduct = async (req, res, next) => {
   try {
     const { categoryId, name, description, price, status, imageId = null } = req.body;
     const product = await Product.create({ categoryId, name, description, price, status, imageId });
+    await ProductVariant.create({ productId: product.id, price, stock: 0, name: '預設' });
     const result = await Product.findByPk(product.id, { include: [imageInclude] });
     res.status(201).json(result);
   } catch (err) {
