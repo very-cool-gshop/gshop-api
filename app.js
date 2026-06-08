@@ -4,6 +4,7 @@ import cors from 'cors';
 import sequelize from './config/db.js';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
+import { startJobs } from './jobs/index.js';
 
 const REQUIRED_ENV = ['DATABASE_URL', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
 const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
@@ -27,4 +28,5 @@ sequelize
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  startJobs();
 });
