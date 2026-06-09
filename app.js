@@ -6,7 +6,7 @@ import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
 import { startJobs } from './jobs/index.js';
 
-const REQUIRED_ENV = ['DATABASE_URL', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
+const REQUIRED_ENV = ['DATABASE_URL', 'JWT_SECRET'];
 const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
 if (missing.length) {
   console.error(`Missing required env variables: ${missing.join(', ')}`);
