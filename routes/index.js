@@ -5,8 +5,14 @@ import { register, login, me, changePassword } from '../controllers/authControll
 import { getUsers, getUser, updateUser, deleteUser } from '../controllers/userController.js';
 import { getCategories, getCategory, createCategory, updateCategory, deleteCategory } from '../controllers/categoryController.js';
 import {
-  getProducts, getProduct, createProduct, updateProduct, deleteProduct,
-  createVariant, updateVariant, deleteVariant,
+  getProducts,
+  getProduct,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  createVariant,
+  updateVariant,
+  deleteVariant,
 } from '../controllers/productController.js';
 import { getImages, uploadImage, updateImage, deleteImage } from '../controllers/productImageController.js';
 import { getReviews, createReview, updateReview, deleteReview } from '../controllers/reviewController.js';
@@ -22,7 +28,7 @@ const router = Router();
 const adminOnly = authorize('admin');
 
 // Health check
-router.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+router.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString(), message: 'dummy text ' }));
 
 // Sliders (前台公開)
 router.get('/sliders', getSliders);
