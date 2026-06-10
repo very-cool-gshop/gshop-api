@@ -28,7 +28,7 @@ const router = Router();
 const adminOnly = authorize('admin');
 
 // Health check
-router.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString(), message: 'dummy text ' }));
+router.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString(), message: 'test string' }));
 
 // Sliders (前台公開)
 router.get('/sliders', getSliders);
