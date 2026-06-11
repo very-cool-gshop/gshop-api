@@ -6,6 +6,15 @@ export async function advanceOrderStatus() {
   const now = new Date();
 
   const daysAgo = (days) => new Date(now - days * 24 * 60 * 60 * 1000);
+  const hoursAgo = (hours) => new Date(now - hours * 60 * 60 * 1000);
+
+  // pending + payment paid 超過 1 小時 → paid
+  const paid = await sequelize.query(`
+    UPDATE orders SET status = 'paid', updated_at = NOW()
+    WHERE status = 'pending' AND updated_at < :cutoff
+      AND id IN (SELECT order_id FROM payments WHERE status = 'paid')
+    RETURNING id
+  `, { replacements: { cutoff: hoursAgo(1) }, type: sequelize.QueryTypes.SELECT });
 
   // pending 超過 3 天 → cancelled，補回庫存
   const pendingOrders = await Order.findAll({
@@ -19,7 +28,7 @@ export async function advanceOrderStatus() {
       }
     }
     await order.update({ status: 'cancelled' });
-    await Payment.update({ status: 'failed' }, { where: { orderId: order.id, status: 'pending' } });
+    await Payment.update({ status: 'cancelled' }, { where: { orderId: order.id, status: 'pending' } });
   }
 
   // paid 超過 1 天 → shipped
@@ -34,5 +43,5 @@ export async function advanceOrderStatus() {
     WHERE status = 'shipped' AND updated_at < :cutoff RETURNING id
   `, { replacements: { cutoff: daysAgo(2) }, type: sequelize.QueryTypes.SELECT });
 
-  return `cancelled=${pendingOrders.length} shipped=${shipped.length} delivered=${delivered.length}`;
+  return `paid=${paid.length} cancelled=${pendingOrders.length} shipped=${shipped.length} delivered=${delivered.length}`;
 }

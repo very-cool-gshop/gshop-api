@@ -9,7 +9,6 @@ import Order from './order.js';
 import OrderItem from './orderItem.js';
 import Payment from './payment.js';
 import Review from './review.js';
-import Slider from './slider.js';
 import DailySnapshot from './dailySnapshot.js';
 import JobLog from './jobLog.js';
 
@@ -51,15 +50,12 @@ Review.belongsTo(User, { foreignKey: 'userId' });
 Review.belongsTo(Product, { foreignKey: 'productId' });
 Review.belongsTo(OrderItem, { foreignKey: 'orderItemId' });
 
-// Slider
-Slider.belongsTo(Product, { foreignKey: 'productId' });
-
 export {
   User, Category,
   Product, ProductVariant, ProductImage,
   Cart, CartItem,
   Order, OrderItem, Payment,
-  Review, Slider,
+  Review,
   DailySnapshot,
   JobLog,
 };
