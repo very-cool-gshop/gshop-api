@@ -22,7 +22,7 @@ export async function generateOrders() {
   const user = pick(users);
   const isCancelled = Math.random() < 0.1;
   const orderStatus = isCancelled ? 'cancelled' : 'delivered';
-  const paymentStatus = isCancelled ? 'cancelled' : 'pending';
+  const paymentStatus = isCancelled ? 'cancelled' : 'paid';
 
   const itemCount = randInt(1, 4);
   const shuffled = [...variants].sort(() => Math.random() - 0.5).slice(0, itemCount);
