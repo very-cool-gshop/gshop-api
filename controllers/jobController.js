@@ -40,17 +40,26 @@ export const triggerJob = async (req, res, next) => {
   }
 };
 
-// GET /admin/jobs/logs?jobName=generateOrders&limit=50
+// GET /admin/jobs/logs?jobName=generateOrders&page=1&limit=50
 export const getJobLogs = async (req, res, next) => {
   try {
-    const { jobName, limit = 50 } = req.query;
+    const { jobName, page = 1, limit = 50 } = req.query;
     const where = jobName ? { jobName } : {};
-    const logs = await JobLog.findAll({
+    const offset = (Number(page) - 1) * Number(limit);
+
+    const { count, rows } = await JobLog.findAndCountAll({
       where,
       order: [['createdAt', 'DESC']],
-      limit: Math.min(Number(limit), 200),
+      limit: Number(limit),
+      offset,
     });
-    res.json(logs);
+
+    res.json({
+      total: count,
+      page: Number(page),
+      totalPages: Math.ceil(count / Number(limit)),
+      data: rows,
+    });
   } catch (err) {
     next(err);
   }
