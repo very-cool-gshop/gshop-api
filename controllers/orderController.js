@@ -135,6 +135,13 @@ export const updateOrderStatus = async (req, res, next) => {
       }
     }
 
+    if (status === 'cancelled' && order.status !== 'cancelled') {
+      await Payment.update(
+        { status: 'cancelled' },
+        { where: { orderId: order.id, status: 'pending' }, transaction: t }
+      );
+    }
+
     await order.update({ status }, { transaction: t });
     await t.commit();
     res.json(order);
