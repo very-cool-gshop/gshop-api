@@ -18,54 +18,53 @@ export async function generateOrders() {
   );
   if (!users.length || !variants.length) return;
 
-  const count = randInt(1, 3);
   const now = new Date();
+  const user = pick(users);
+  const isCancelled = Math.random() < 0.1;
+  const orderStatus = isCancelled ? 'cancelled' : 'delivered';
+  const paymentStatus = isCancelled ? 'cancelled' : 'pending';
 
-  for (let i = 0; i < count; i++) {
-    const user = pick(users);
-    const itemCount = randInt(1, 4);
-    const shuffled = [...variants].sort(() => Math.random() - 0.5).slice(0, itemCount);
-    const items = shuffled.map(v => {
-      const qty = randInt(1, 3);
-      return { variant: v, quantity: qty, subtotal: parseFloat(v.price) * qty };
-    });
-    const totalAmount = items.reduce((sum, it) => sum + it.subtotal, 0);
+  const itemCount = randInt(1, 4);
+  const shuffled = [...variants].sort(() => Math.random() - 0.5).slice(0, itemCount);
+  const items = shuffled.map(v => {
+    const qty = randInt(1, 3);
+    return { variant: v, quantity: qty, subtotal: parseFloat(v.price) * qty };
+  });
+  const totalAmount = items.reduce((sum, it) => sum + it.subtotal, 0);
 
-    const order = await Order.create({
-      id: randomUUID(),
-      userId: user.id,
-      status: 'pending',
-      totalAmount,
-      discountAmount: 0,
-      address: user.address,
-      recipientName: user.name,
-      recipientPhone: user.phone,
-      createdAt: now,
-      updatedAt: now,
-    });
+  const order = await Order.create({
+    id: randomUUID(),
+    userId: user.id,
+    status: orderStatus,
+    totalAmount,
+    discountAmount: 0,
+    address: user.address,
+    recipientName: user.name,
+    recipientPhone: user.phone,
+    createdAt: now,
+    updatedAt: now,
+  });
 
-    await OrderItem.bulkCreate(items.map(it => ({
-      orderId: order.id,
-      productId: it.variant.product_id,
-      variantId: it.variant.variant_id,
-      productName: it.variant.product_name,
-      variantName: it.variant.variant_name,
-      unitPrice: parseFloat(it.variant.price),
-      quantity: it.quantity,
-      subtotal: it.subtotal,
-    })));
+  await OrderItem.bulkCreate(items.map(it => ({
+    orderId: order.id,
+    productId: it.variant.product_id,
+    variantId: it.variant.variant_id,
+    productName: it.variant.product_name,
+    variantName: it.variant.variant_name,
+    unitPrice: parseFloat(it.variant.price),
+    quantity: it.quantity,
+    subtotal: it.subtotal,
+  })));
 
-    await Payment.create({
-      orderId: order.id,
-      method: pick(PAYMENT_METHODS),
-      status: 'paid',
-      amount: totalAmount,
-      transactionId: `TXN${Date.now()}${randInt(100, 999)}`,
-      paidAt: now,
-      createdAt: now,
-      updatedAt: now,
-    });
-  }
+  await Payment.create({
+    orderId: order.id,
+    method: pick(PAYMENT_METHODS),
+    status: paymentStatus,
+    amount: totalAmount,
+    transactionId: `TXN${Date.now()}${randInt(100, 999)}`,
+    createdAt: now,
+    updatedAt: now,
+  });
 
-  return `Created ${count} orders`;
+  return `Created 1 ${orderStatus} order`;
 }

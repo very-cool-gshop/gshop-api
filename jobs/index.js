@@ -1,7 +1,6 @@
 import cron from 'node-cron';
 import { JobLog } from '../models/index.js';
 import { generateOrders } from './generateOrders.js';
-import { advanceOrderStatus } from './advanceStatus.js';
 import { buildDailySnapshot } from './dailySnapshot.js';
 
 const jobs = [
@@ -9,11 +8,6 @@ const jobs = [
     name: 'generateOrders',
     schedule: '0 */4 * * *',
     fn: generateOrders,
-  },
-  {
-    name: 'advanceOrderStatus',
-    schedule: '30 * * * *',
-    fn: advanceOrderStatus,
   },
   {
     name: 'dailySnapshot',
