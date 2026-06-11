@@ -6,7 +6,7 @@ import { buildDailySnapshot } from './dailySnapshot.js';
 const jobs = [
   {
     name: 'generateOrders',
-    schedule: '0 */4 * * *',
+    schedule: '0 */3 * * *',
     fn: generateOrders,
   },
   {
