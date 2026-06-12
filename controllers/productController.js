@@ -14,6 +14,7 @@ export const getProducts = async (req, res, next) => {
       categoryId,
       minPrice,
       maxPrice,
+      inStock,
       sortBy = 'createdAt',
       order = 'DESC',
       page = 1,
@@ -36,9 +37,14 @@ export const getProducts = async (req, res, next) => {
 
     const offset = (Number(page) - 1) * Number(limit);
 
+    const variantInclude = inStock === 'true'
+      ? { model: ProductVariant, where: { stock: { [Op.gt]: 0 } }, required: true, attributes: [] }
+      : null;
+
     const { count, rows } = await Product.findAndCountAll({
       where,
-      include: [imageInclude],
+      include: [imageInclude, ...(variantInclude ? [variantInclude] : [])],
+      distinct: true,
       order: [[sortColumn, sortOrder]],
       limit: Number(limit),
       offset,
