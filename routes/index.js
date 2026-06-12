@@ -20,7 +20,7 @@ import { getOrders, getOrder, createOrder, updateOrderStatus } from '../controll
 import { getPayment, confirmPayment } from '../controllers/paymentController.js';
 import { getCart, addCartItem, updateCartItem, removeCartItem, checkout } from '../controllers/cartController.js';
 import { analyzeProductImage } from '../controllers/analyzeController.js';
-import { getDashboard, getLowStock } from '../controllers/dashboardController.js';
+import { getDashboard, getLowStock, getOrderStatusDist } from '../controllers/dashboardController.js';
 import { getJobs, triggerJob, getJobLogs } from '../controllers/jobController.js';
 
 const router = Router();
@@ -98,6 +98,7 @@ router.post('/cart/checkout', checkout);
 
 // Dashboard (admin only)
 router.get('/dashboard', adminOnly, getDashboard);
+router.get('/dashboard/order-status-dist', adminOnly, getOrderStatusDist);
 router.get('/dashboard/low-stock', adminOnly, getLowStock);
 
 // Jobs (admin only)

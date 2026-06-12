@@ -40,13 +40,6 @@ async function buildSnapshot(date) {
     WHERE created_at >= :start AND created_at < :end
   `, { replacements: { start, end }, type: sequelize.QueryTypes.SELECT });
 
-  const statusRows = await sequelize.query(`
-    SELECT status, COUNT(*) AS count FROM orders
-    WHERE created_at >= :start AND created_at < :end
-    GROUP BY status
-  `, { replacements: { start, end }, type: sequelize.QueryTypes.SELECT });
-  const orderStatusDist = Object.fromEntries(statusRows.map(r => [r.status, parseInt(r.count)]));
-
   const topProducts = await sequelize.query(`
     SELECT oi.product_id AS "productId", oi.product_name AS "productName",
            SUM(oi.subtotal) AS "totalRevenue", SUM(oi.quantity) AS "totalQuantity"
@@ -88,7 +81,6 @@ async function buildSnapshot(date) {
     orderCount: parseInt(orderCount),
     newUserCount: parseInt(newUserCount),
     avgOrderValue,
-    orderStatusDist,
     topProducts: topProducts.map(r => ({ ...r, totalRevenue: parseFloat(r.totalRevenue), totalQuantity: parseInt(r.totalQuantity) })),
     topCategories: topCategories.map(r => ({ ...r, totalRevenue: parseFloat(r.totalRevenue), totalQuantity: parseInt(r.totalQuantity) })),
     paymentMethods: paymentMethods.map(r => ({ ...r, count: parseInt(r.count), amount: parseFloat(r.amount) })),

@@ -22,10 +22,6 @@ const DailySnapshot = sequelize.define('DailySnapshot', {
     type: DataTypes.DECIMAL(10, 2),
     defaultValue: 0,
   },
-  orderStatusDist: {
-    type: DataTypes.JSONB,
-    defaultValue: {},
-  },
   topProducts: {
     type: DataTypes.JSONB,
     defaultValue: [],

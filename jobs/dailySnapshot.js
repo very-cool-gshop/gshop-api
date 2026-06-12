@@ -21,7 +21,7 @@ export async function buildDailySnapshot(targetDate) {
   const end = new Date(start);
   end.setDate(end.getDate() + 1);
 
-  const [[revenue], [userRow], statusRows, topProducts, topCategories, paymentMethods] = await Promise.all([
+  const [[revenue], [userRow], topProducts, topCategories, paymentMethods] = await Promise.all([
     sequelize.query(`
       SELECT
         COALESCE(SUM(total_amount) FILTER (WHERE status IN ('paid','shipped','delivered')), 0) AS revenue,
@@ -32,11 +32,6 @@ export async function buildDailySnapshot(targetDate) {
 
     sequelize.query(`
       SELECT COUNT(*) AS count FROM users WHERE created_at >= :start AND created_at < :end
-    `, { replacements: { start, end }, type: sequelize.QueryTypes.SELECT }),
-
-    sequelize.query(`
-      SELECT status, COUNT(*) AS count FROM orders
-      WHERE created_at >= :start AND created_at < :end GROUP BY status
     `, { replacements: { start, end }, type: sequelize.QueryTypes.SELECT }),
 
     sequelize.query(`
@@ -76,7 +71,6 @@ export async function buildDailySnapshot(targetDate) {
     orderCount: parseInt(revenue.order_count) || 0,
     newUserCount: parseInt(userRow.count) || 0,
     avgOrderValue: paidCount > 0 ? parseFloat((rev / paidCount).toFixed(2)) : 0,
-    orderStatusDist: Object.fromEntries(statusRows.map(r => [r.status, parseInt(r.count)])),
     topProducts: topProducts.map(r => ({ ...r, totalRevenue: parseFloat(r.totalRevenue), totalQuantity: parseInt(r.totalQuantity) })),
     topCategories: topCategories.map(r => ({ ...r, totalRevenue: parseFloat(r.totalRevenue), totalQuantity: parseInt(r.totalQuantity) })),
     paymentMethods: paymentMethods.map(r => ({ method: r.method, count: parseInt(r.count), amount: parseFloat(r.amount) })),

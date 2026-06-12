@@ -15,7 +15,7 @@ async function queryToday() {
   const end = new Date(start);
   end.setDate(end.getDate() + 1);
 
-  const [[revenue], [userRow], statusRows, topProducts, topCategories, paymentMethods] = await Promise.all([
+  const [[revenue], [userRow], topProducts, topCategories, paymentMethods] = await Promise.all([
     sequelize.query(`
       SELECT
         COALESCE(SUM(total_amount) FILTER (WHERE status IN ('paid','shipped','delivered')), 0) AS revenue,
@@ -27,12 +27,6 @@ async function queryToday() {
     sequelize.query(`
       SELECT COUNT(*) AS count FROM users
       WHERE created_at >= :start AND created_at < :end
-    `, { replacements: { start, end }, type: sequelize.QueryTypes.SELECT }),
-
-    sequelize.query(`
-      SELECT status, COUNT(*) AS count FROM orders
-      WHERE created_at >= :start AND created_at < :end
-      GROUP BY status
     `, { replacements: { start, end }, type: sequelize.QueryTypes.SELECT }),
 
     sequelize.query(`
@@ -74,7 +68,6 @@ async function queryToday() {
     orderCount: parseInt(revenue.order_count) || 0,
     newUserCount: parseInt(userRow.count) || 0,
     avgOrderValue: paidCount > 0 ? parseFloat((rev / paidCount).toFixed(2)) : 0,
-    orderStatusDist: Object.fromEntries(statusRows.map(r => [r.status, parseInt(r.count)])),
     topProducts: topProducts.map(r => ({ ...r, totalRevenue: parseFloat(r.totalRevenue), totalQuantity: parseInt(r.totalQuantity) })),
     topCategories: topCategories.map(r => ({ ...r, totalRevenue: parseFloat(r.totalRevenue), totalQuantity: parseInt(r.totalQuantity) })),
     paymentMethods: paymentMethods.map(r => ({ method: r.method, count: parseInt(r.count), amount: parseFloat(r.amount) })),
@@ -100,6 +93,19 @@ export const getDashboard = async (req, res, next) => {
     ]);
 
     res.json([...snapshots, todayData]);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /dashboard/order-status-dist
+export const getOrderStatusDist = async (req, res, next) => {
+  try {
+    const rows = await sequelize.query(
+      `SELECT status, COUNT(*) AS count FROM orders GROUP BY status ORDER BY status`,
+      { type: sequelize.QueryTypes.SELECT }
+    );
+    res.json(Object.fromEntries(rows.map(r => [r.status, parseInt(r.count)])));
   } catch (err) {
     next(err);
   }
