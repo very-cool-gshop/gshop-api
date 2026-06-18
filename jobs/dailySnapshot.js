@@ -1,25 +1,17 @@
 import sequelize from '../config/db.js';
 import { DailySnapshot } from '../models/index.js';
 
-function toLocalDateStr(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+function toTaipeiDateStr(date) {
+  return date.toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
 }
 
 export async function buildDailySnapshot(targetDate) {
-  const date = targetDate || (() => {
-    const d = new Date();
-    d.setDate(d.getDate() - 1);
-    return d;
-  })();
+  const dateStr = targetDate
+    ? toTaipeiDateStr(targetDate)
+    : toTaipeiDateStr(new Date(Date.now() - 86400000));
 
-  const dateStr = toLocalDateStr(date);
-  const start = new Date(date);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
+  const start = new Date(`${dateStr}T00:00:00+08:00`);
+  const end = new Date(start.getTime() + 86400000);
 
   const [[revenue], [userRow], topProducts, topCategories, paymentMethods] = await Promise.all([
     sequelize.query(`

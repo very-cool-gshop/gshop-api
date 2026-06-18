@@ -1,19 +1,14 @@
 import sequelize from '../config/db.js';
 import { Order, User, DailySnapshot } from '../models/index.js';
 
-function toLocalDateStr(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+function toTaipeiDateStr(date) {
+  return date.toLocaleDateString('en-CA', { timeZone: 'Asia/Taipei' });
 }
 
 async function buildSnapshot(date) {
-  const dateStr = toLocalDateStr(date);
-  const start = new Date(date);
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
+  const dateStr = toTaipeiDateStr(date);
+  const start = new Date(`${dateStr}T00:00:00+08:00`);
+  const end = new Date(start.getTime() + 86400000);
 
   const [revenueRow] = await sequelize.query(`
     SELECT
@@ -96,19 +91,17 @@ async function main() {
     process.exit(0);
   }
 
-  const start = new Date(earliest.createdAt);
-  start.setHours(0, 0, 0, 0);
+  const startDateStr = toTaipeiDateStr(new Date(earliest.createdAt));
+  const todayStr = toTaipeiDateStr(new Date());
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const current = new Date(start);
+  const current = new Date(`${startDateStr}T00:00:00+08:00`);
+  const todayMidnight = new Date(`${todayStr}T00:00:00+08:00`);
   let count = 0;
 
-  while (current < today) {
+  while (current < todayMidnight) {
     const dateStr = await buildSnapshot(new Date(current));
     console.log(`✓ ${dateStr}`);
-    current.setDate(current.getDate() + 1);
+    current.setTime(current.getTime() + 86400000);
     count++;
   }
 
