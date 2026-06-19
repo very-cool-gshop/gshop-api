@@ -25,6 +25,7 @@ import { getJobs, triggerJob, getJobLogs } from '../controllers/jobController.js
 
 const router = Router();
 const adminOnly = authorize('admin');
+const adminOrViewer = authorize('admin', 'viewer');
 
 // Health check
 router.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString(), message: 'test string' }));
@@ -47,8 +48,8 @@ router.get('/auth/me', me);
 router.patch('/auth/change-password', changePassword);
 
 // Users (admin only)
-router.get('/users', adminOnly, getUsers);
-router.get('/users/:id', adminOnly, getUser);
+router.get('/users', adminOrViewer, getUsers);
+router.get('/users/:id', adminOrViewer, getUser);
 router.patch('/users/:id', adminOnly, updateUser);
 router.delete('/users/:id', adminOnly, deleteUser);
 
@@ -97,13 +98,13 @@ router.delete('/cart/items/:itemId', removeCartItem);
 router.post('/cart/checkout', checkout);
 
 // Dashboard (admin only)
-router.get('/dashboard', adminOnly, getDashboard);
-router.get('/dashboard/order-status-dist', adminOnly, getOrderStatusDist);
-router.get('/dashboard/low-stock', adminOnly, getLowStock);
+router.get('/dashboard', adminOrViewer, getDashboard);
+router.get('/dashboard/order-status-dist', adminOrViewer, getOrderStatusDist);
+router.get('/dashboard/low-stock', adminOrViewer, getLowStock);
 
 // Jobs (admin only)
-router.get('/admin/jobs', adminOnly, getJobs);
-router.get('/admin/jobs/logs', adminOnly, getJobLogs);
+router.get('/admin/jobs', adminOrViewer, getJobs);
+router.get('/admin/jobs/logs', adminOrViewer, getJobLogs);
 router.post('/admin/jobs/:name/run', adminOnly, triggerJob);
 
 export default router;
