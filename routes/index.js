@@ -16,7 +16,7 @@ import {
 } from '../controllers/productController.js';
 import { getImages, uploadImage, updateImage, deleteImage } from '../controllers/productImageController.js';
 import { getReviews, createReview, updateReview, deleteReview } from '../controllers/reviewController.js';
-import { getOrders, getOrder, createOrder, updateOrderStatus } from '../controllers/orderController.js';
+import { getOrders, getAllOrders, getOrder, createOrder, updateOrderStatus } from '../controllers/orderController.js';
 import { getPayment, confirmPayment } from '../controllers/paymentController.js';
 import { getCart, addCartItem, updateCartItem, removeCartItem, checkout } from '../controllers/cartController.js';
 import { analyzeProductImage } from '../controllers/analyzeController.js';
@@ -81,6 +81,7 @@ router.patch('/reviews/:id', updateReview);
 router.delete('/reviews/:id', deleteReview);
 
 // Orders
+router.get('/orders/all', adminOrViewer, getAllOrders);
 router.get('/orders', getOrders);
 router.get('/orders/:id', getOrder);
 router.post('/orders', createOrder);

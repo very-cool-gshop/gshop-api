@@ -4,16 +4,50 @@ import AppError from '../utils/AppError.js';
 
 export const getOrders = async (req, res, next) => {
   try {
-    const { status, orderId, userId, page = 1, limit = 20 } = req.query;
+    const { status, orderId, page = 1, limit = 20 } = req.query;
 
-    const where = req.user.role === 'admin' ? {} : { userId: req.user.id };
+    const where = { userId: req.user.id };
     if (status) where.status = status;
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (orderId) {
       if (!uuidRegex.test(orderId)) return res.json({ total: 0, page: Number(page), totalPages: 0, data: [] });
       where.id = orderId;
     }
-    if (userId && req.user.role === 'admin') {
+
+    const offset = (Number(page) - 1) * Number(limit);
+
+    const { count, rows } = await Order.findAndCountAll({
+      where,
+      include: [OrderItem],
+      order: [['createdAt', 'DESC']],
+      limit: Number(limit),
+      offset,
+      distinct: true,
+    });
+
+    res.json({
+      total: count,
+      page: Number(page),
+      totalPages: Math.ceil(count / Number(limit)),
+      data: rows,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getAllOrders = async (req, res, next) => {
+  try {
+    const { status, orderId, userId, page = 1, limit = 20 } = req.query;
+
+    const where = {};
+    if (status) where.status = status;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (orderId) {
+      if (!uuidRegex.test(orderId)) return res.json({ total: 0, page: Number(page), totalPages: 0, data: [] });
+      where.id = orderId;
+    }
+    if (userId) {
       if (!uuidRegex.test(userId)) return res.json({ total: 0, page: Number(page), totalPages: 0, data: [] });
       where.userId = userId;
     }
