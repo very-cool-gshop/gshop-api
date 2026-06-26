@@ -28,7 +28,7 @@ const adminOnly = authorize('admin');
 const adminOrViewer = authorize('admin', 'viewer');
 
 // Health check
-router.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString(), message: 'test string demo for 金磚' }));
+router.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString(), message: 'test demo 6/26' }));
 
 // Auth (public)
 router.post('/auth/register', register);
